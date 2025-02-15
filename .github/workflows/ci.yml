@@ -25,6 +25,11 @@ jobs:
       - name: Type check
         run: npm run type-check
         
+      - name: Install and configure ESLint
+        run: |
+          npm install -D eslint eslint-config-next
+          echo '{"extends": "next/core-web-vitals"}' > .eslintrc.json
+        
       - name: Lint
         run: npm run lint
         
