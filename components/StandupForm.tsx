@@ -10,6 +10,7 @@ import { format } from "date-fns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { CurrentTime } from "./CurrentTime"
+import { CurrentDate } from "./CurrentDate"
 
 export default function StandupForm() {
   const [entry, setEntry] = useState("")
@@ -54,10 +55,7 @@ export default function StandupForm() {
       <CardHeader>
         <CardTitle className="text-2xl">Log Your Progress</CardTitle>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Calendar className="h-4 w-4" />
-            {format(currentDateTime, "EEEE, MMMM d, yyyy")}
-          </span>
+          <CurrentDate />
           <CurrentTime />
         </div>
       </CardHeader>

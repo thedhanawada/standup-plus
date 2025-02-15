@@ -2,14 +2,20 @@
 
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/contexts/AuthContext"
-import { InfoIcon, Github, LogOut } from "lucide-react"
+import { InfoIcon, Github, LogOut, Sparkles } from "lucide-react"
 
 export default function Header() {
   const { user, signInWithGithub, logout } = useAuth()
 
   return (
-    <header className="mb-12 text-center">
-      <div className="flex justify-end mb-4">
+    <header className="mb-12">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2">
+          <Sparkles className="h-8 w-8 text-purple-500" />
+          <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-pink-600">
+            StandUp+
+          </span>
+        </div>
         {user ? (
           <Button 
             variant="outline" 
@@ -21,24 +27,33 @@ export default function Header() {
           </Button>
         ) : (
           <Button 
-            variant="outline" 
             onClick={signInWithGithub}
-            className="flex items-center gap-2 hover:bg-black hover:text-white transition-colors"
+            className="flex items-center gap-2 bg-black hover:bg-black/90 text-white transition-colors"
           >
             <Github className="h-5 w-5" />
             Continue with GitHub
           </Button>
         )}
       </div>
-      <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
-        StandUp+
-      </h1>
-      <p className="text-lg text-muted-foreground mb-4">
-        Streamline your daily updates, track your progress, and stay in sync with your goals.
-      </p>
-      <div className="inline-flex items-center bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg">
-        <InfoIcon className="mr-2" />
-        <span>Your data is stored locally by default. Sign in to enable cloud sync and access your updates from anywhere.</span>
+
+      <div className="text-center max-w-2xl mx-auto space-y-4">
+        <h1 className="text-4xl sm:text-5xl font-bold">
+          Track Your Daily Progress with{" "}
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+            Ease
+          </span>
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Streamline your daily updates, track your progress, and stay in sync with your goals.
+        </p>
+        {!user && (
+          <div className="inline-flex items-center bg-blue-50 border border-blue-200 text-blue-800 p-4 rounded-lg">
+            <InfoIcon className="mr-2 h-5 w-5 flex-shrink-0" />
+            <span className="text-sm">
+              Your data is stored locally by default. Sign in to enable cloud sync and access your updates from anywhere.
+            </span>
+          </div>
+        )}
       </div>
     </header>
   )
