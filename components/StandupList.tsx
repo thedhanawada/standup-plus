@@ -2,11 +2,12 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { useStandup } from "@/contexts/StandupContext"
-import { Edit2, Trash2, Save, X } from "lucide-react"
+import { Edit2, Trash2, Save, X, Clock } from "lucide-react"
+import { format, parseISO } from "date-fns"
 
 export default function StandupList() {
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -36,57 +37,93 @@ export default function StandupList() {
     })
   }
 
+  // Group entries by date
+  const groupedEntries = entries.reduce((groups, entry) => {
+    const date = format(parseISO(entry.date), 'yyyy-MM-dd')
+    if (!groups[date]) {
+      groups[date] = []
+    }
+    groups[date].push(entry)
+    return groups
+  }, {} as Record<string, typeof entries>)
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground mb-4">Recent Updates</h2>
-      {entries.length === 0 ? (
-        <Card className="bg-card text-card-foreground">
-          <CardContent className="pt-6">
-            <p className="text-muted-foreground text-center">No updates yet. Start tracking your progress!</p>
-          </CardContent>
-        </Card>
-      ) : (
-        entries.map((entry) => (
-          <Card key={entry.id} className="bg-card text-card-foreground">
-            <CardHeader className="bg-muted">
-              <CardTitle className="text-lg font-semibold">
-                {new Date(entry.date).toLocaleDateString(undefined, {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {editingId === entry.id ? (
-                <Textarea value={editText} onChange={(e) => setEditText(e.target.value)} className="min-h-[100px]" />
-              ) : (
-                <p className="text-foreground whitespace-pre-wrap">{entry.text}</p>
-              )}
-            </CardContent>
-            <CardFooter className="justify-end space-x-2 bg-muted">
-              {editingId === entry.id ? (
-                <>
-                  <Button onClick={() => handleSave(entry.id)} size="icon" variant="outline">
-                    <Save className="h-4 w-4" />
-                  </Button>
-                  <Button onClick={() => setEditingId(null)} size="icon" variant="outline">
-                    <X className="h-4 w-4" />
-                  </Button>
-                </>
-              ) : (
-                <Button onClick={() => handleEdit(entry.id, entry.text)} size="icon" variant="outline">
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              )}
-              <Button onClick={() => handleDelete(entry.id)} size="icon" variant="destructive">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
-        ))
-      )}
+    <div className="space-y-8">
+      {Object.entries(groupedEntries).map(([date, dateEntries]) => (
+        <div key={date} className="space-y-4">
+          <h2 className="text-xl font-semibold">
+            {format(parseISO(date), 'EEEE d MMMM yyyy')}
+          </h2>
+          <div className="space-y-3">
+            {dateEntries.map((entry) => (
+              <Card key={entry.id} className="group overflow-hidden transition-all hover:shadow-md">
+                <div className="p-6">
+                  {editingId === entry.id ? (
+                    <div className="space-y-4">
+                      <Textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        className="min-h-[100px] resize-none p-4"
+                      />
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => handleSave(entry.id)}
+                          className="gap-2"
+                        >
+                          <Save className="h-4 w-4" />
+                          Save
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setEditingId(null)}
+                          className="gap-2"
+                        >
+                          <X className="h-4 w-4" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          {format(parseISO(entry.date), 'h:mm a')}
+                        </div>
+                        <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(entry.id, entry.text)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(entry.id)}
+                            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="text-sm leading-relaxed">
+                        {entry.text.split('\n').map((line, i) => (
+                          <p key={i} className="mt-1 first:mt-0">
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

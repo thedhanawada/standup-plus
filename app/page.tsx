@@ -7,7 +7,7 @@ import { InfoIcon } from "lucide-react"
 export default function Home() {
   return (
     <StandupProvider>
-      <main className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-8">
+      <main className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 p-8 pb-16">
         <div className="container mx-auto max-w-5xl">
           <header className="mb-12 text-center">
             <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-4">
