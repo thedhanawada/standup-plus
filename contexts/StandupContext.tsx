@@ -20,13 +20,16 @@ const StandupContext = createContext<StandupContextType | undefined>(undefined)
 
 export function StandupProvider({ children }: { children: React.ReactNode }) {
   const [entries, setEntries] = useState<StandupEntry[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const savedEntries = JSON.parse(localStorage.getItem("standupEntries") || "[]")
     setEntries(savedEntries)
   }, [])
 
   const addEntry = (text: string) => {
+    if (!mounted) return
     const newEntry = {
       id: Date.now(),
       text: text.trim(),
@@ -38,15 +41,21 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateEntry = (id: number, text: string) => {
+    if (!mounted) return
     const updatedEntries = entries.map((entry) => (entry.id === id ? { ...entry, text } : entry))
     setEntries(updatedEntries)
     localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
   }
 
   const deleteEntry = (id: number) => {
+    if (!mounted) return
     const updatedEntries = entries.filter((entry) => entry.id !== id)
     setEntries(updatedEntries)
     localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+  }
+
+  if (!mounted) {
+    return null
   }
 
   return (

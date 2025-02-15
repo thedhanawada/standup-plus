@@ -13,12 +13,12 @@ import { Label } from "@/components/ui/label"
 export default function StandupForm() {
   const [entry, setEntry] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null)
+  const [currentDateTime, setCurrentDateTime] = useState(new Date())
   const { toast } = useToast()
   const { addEntry } = useStandup()
 
   useEffect(() => {
-    setCurrentDateTime(new Date())
+    // Update time every minute
     const timer = setInterval(() => {
       setCurrentDateTime(new Date())
     }, 60000)
@@ -53,18 +53,14 @@ export default function StandupForm() {
       <CardHeader>
         <CardTitle className="text-2xl">Log Your Progress</CardTitle>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
-          {currentDateTime && (
-            <>
-              <span className="flex items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                {format(currentDateTime, "EEEE, MMMM d, yyyy")}
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" />
-                {format(currentDateTime, "h:mm a")}
-              </span>
-            </>
-          )}
+          <span className="flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            {format(currentDateTime, "EEEE, MMMM d, yyyy")}
+          </span>
+          <span className="flex items-center gap-1">
+            <Clock className="h-4 w-4" />
+            {format(currentDateTime, "h:mm a")}
+          </span>
         </div>
       </CardHeader>
       <CardContent>

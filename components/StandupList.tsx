@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
@@ -12,8 +12,13 @@ import { format, parseISO } from "date-fns"
 export default function StandupList() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editText, setEditText] = useState("")
+  const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
   const { entries, updateEntry, deleteEntry } = useStandup()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleEdit = (id: number, text: string) => {
     setEditingId(id)
@@ -47,16 +52,30 @@ export default function StandupList() {
     return groups
   }, {} as Record<string, typeof entries>)
 
+  const TimeDisplay = ({ date }: { date: string }) => {
+    if (!mounted) return null
+    return (
+      <div className="flex items-center gap-1">
+        <Clock className="h-4 w-4" />
+        {format(parseISO(date), 'h:mm a')}
+      </div>
+    )
+  }
+
+  if (!mounted) {
+    return null // or a loading skeleton
+  }
+
   return (
-    <div className="space-y-8">
+    <div className="h-[calc(100vh-400px)] overflow-y-auto pr-4 space-y-6">
       {Object.entries(groupedEntries).map(([date, dateEntries]) => (
-        <div key={date} className="space-y-4">
-          <h2 className="text-xl font-semibold">
+        <div key={date} className="space-y-3">
+          <h2 className="text-xl font-semibold sticky top-0 py-3 z-10">
             {format(parseISO(date), 'EEEE d MMMM yyyy')}
           </h2>
           <div className="space-y-3">
             {dateEntries.map((entry) => (
-              <Card key={entry.id} className="group overflow-hidden transition-all hover:shadow-md">
+              <Card key={entry.id} className="group overflow-hidden transition-all hover:shadow-md bg-white/50 backdrop-blur-sm border-0">
                 <div className="p-6">
                   {editingId === entry.id ? (
                     <div className="space-y-4">
@@ -86,10 +105,7 @@ export default function StandupList() {
                   ) : (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Clock className="h-4 w-4" />
-                          {format(parseISO(entry.date), 'h:mm a')}
-                        </div>
+                        <TimeDisplay date={entry.date} />
                         <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
                           <Button
                             variant="ghost"
@@ -124,6 +140,11 @@ export default function StandupList() {
           </div>
         </div>
       ))}
+      {entries.length === 0 && (
+        <div className="text-center text-muted-foreground py-8">
+          <p>No updates yet. Add your first update above!</p>
+        </div>
+      )}
     </div>
   )
 }
