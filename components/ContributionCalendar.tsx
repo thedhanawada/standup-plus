@@ -1,141 +1,180 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { useState } from "react"
 import { useStandup } from "@/contexts/StandupContext"
+import { ChevronLeft, ChevronRight, Clock, Calendar, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { format, parseISO, getYear, formatDistanceToNow } from "date-fns"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
 
-interface ContributionDay {
-  date: string
-  count: number
-}
-
-const ContributionCalendar: React.FC = () => {
+export default function ContributionCalendar() {
   const { entries } = useStandup()
-  const [contributionData, setContributionData] = useState<ContributionDay[]>([])
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear())
-  const currentDate = new Date()
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
-  useEffect(() => {
-    const processEntries = () => {
-      const startDate = new Date(currentYear, 0, 1)
-      const endDate = new Date(currentYear, 11, 31)
-
-      // Adjust start date to previous Monday if January 1st is not a Monday
-      const dayOfWeek = startDate.getDay()
-      if (dayOfWeek !== 1) {
-        startDate.setDate(startDate.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1))
+  // Group entries by date with full entry data
+  const contributionMap = entries.reduce((acc, entry) => {
+    const date = format(parseISO(entry.date), "yyyy-MM-dd")
+    if (!acc[date]) {
+      acc[date] = {
+        count: 1,
+        entries: [entry]
       }
-
-      const daysArray: ContributionDay[] = []
-      for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        daysArray.push({ date: d.toISOString().split("T")[0], count: 0 })
-      }
-
-      const entryCounts = entries.reduce(
-        (acc, entry) => {
-          const entryDate = new Date(entry.date)
-          if (entryDate.getFullYear() === currentYear) {
-            const date = entryDate.toISOString().split("T")[0]
-            acc[date] = (acc[date] || 0) + 1
-          }
-          return acc
-        },
-        {} as Record<string, number>,
-      )
-
-      const filledDaysArray = daysArray.map((day) => ({
-        ...day,
-        count: entryCounts[day.date] || 0,
-      }))
-
-      setContributionData(filledDaysArray)
+    } else {
+      acc[date].count += 1
+      acc[date].entries.push(entry)
     }
+    return acc
+  }, {} as Record<string, { count: number; entries: typeof entries }>) 
 
-    processEntries()
-  }, [entries, currentYear])
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ]
 
-  const getColor = (count: number) => {
+  // Updated color scheme - purple gradient
+  const getContributionColor = (count: number) => {
     if (count === 0) return "bg-gray-100 dark:bg-gray-800"
-    if (count < 2) return "bg-green-200 dark:bg-green-900"
-    if (count < 4) return "bg-green-300 dark:bg-green-700"
-    if (count < 6) return "bg-green-400 dark:bg-green-600"
-    return "bg-green-500 dark:bg-green-500"
+    if (count === 1) return "bg-purple-200 dark:bg-purple-900"
+    if (count === 2) return "bg-fuchsia-300 dark:bg-fuchsia-700"
+    if (count === 3) return "bg-pink-400 dark:bg-pink-600"
+    return "bg-pink-500 dark:bg-pink-500"
   }
-
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-
-  const changeYear = (delta: number) => {
-    const newYear = currentYear + delta
-    if (newYear <= currentDate.getFullYear()) {
-      setCurrentYear(newYear)
+  
+  const generateCalendarData = (year: number) => {
+    const data = []
+    for (let month = 0; month < 12; month++) {
+      const daysInMonth = new Date(year, month + 1, 0).getDate()
+      const days = []
+      
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = format(new Date(year, month, day), "yyyy-MM-dd")
+        const dayData = contributionMap[date] || { count: 0, entries: [] }
+        days.push({ date, ...dayData })
+      }
+      
+      data.push(days)
     }
+    return data
   }
 
-  const getDayOfWeek = (date: string) => {
-    const d = new Date(date)
-    return d.getDay()
-  }
+  const calendarData = generateCalendarData(selectedYear)
 
   return (
-    <Card className="mt-8">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-2xl font-bold">Contribution Calendar</CardTitle>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="icon" onClick={() => changeYear(-1)} aria-label="Previous year">
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <span className="text-lg font-semibold">{currentYear}</span>
+    <div className="bg-white dark:bg-gray-900 rounded-xl p-6 shadow-lg">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold">Contribution Calendar</h2>
+        <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="icon"
-            onClick={() => changeYear(1)}
-            aria-label="Next year"
-            disabled={currentYear >= currentDate.getFullYear()}
+            onClick={() => setSelectedYear(selectedYear - 1)}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-lg font-semibold">{selectedYear}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setSelectedYear(selectedYear + 1)}
+            disabled={selectedYear >= new Date().getFullYear()}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col">
-          <div className="flex justify-start mb-2">
-            {months.map((month) => (
-              <span key={month} className="text-xs text-muted-foreground flex-1 text-center">
-                {month}
-              </span>
-            ))}
+      </div>
+
+      <div className="grid grid-cols-12 gap-4">
+        {months.map((month, monthIndex) => (
+          <div key={month} className="space-y-2">
+            <div className="text-sm font-medium text-gray-500">{month}</div>
+            <div className="grid grid-cols-7 gap-1">
+              {calendarData[monthIndex].map(({ date, count, entries }) => (
+                <HoverCard key={date} openDelay={200}>
+                  <HoverCardTrigger asChild>
+                    <div
+                      className={`w-3 h-3 rounded-sm cursor-pointer transition-colors ${getContributionColor(count)}`}
+                    />
+                  </HoverCardTrigger>
+                  <HoverCardContent 
+                    className="w-96 p-0 shadow-xl" 
+                    align="start"
+                    sideOffset={5}
+                  >
+                    <div className="p-4 bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950 dark:to-purple-950 rounded-t-lg">
+                      <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-300">
+                        <Calendar className="h-4 w-4" />
+                        <time className="font-semibold">
+                          {format(parseISO(date), "MMMM d, yyyy")}
+                        </time>
+                      </div>
+                      <div className="flex items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-300">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{count} contribution{count !== 1 ? "s" : ""} on this day</span>
+                      </div>
+                    </div>
+
+                    <ScrollArea className="max-h-[300px] p-4">
+                      {entries.length > 0 ? (
+                        <div className="space-y-3">
+                          {entries.map((entry, index) => (
+                            <div key={entry.id}>
+                              {index > 0 && <Separator className="my-3" />}
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <Clock className="h-3 w-3" />
+                                    <time>{format(parseISO(entry.date), "h:mm a")}</time>
+                                  </div>
+                                  <span className="text-xs text-gray-400 dark:text-gray-500">
+                                    {formatDistanceToNow(parseISO(entry.date), { addSuffix: true })}
+                                  </span>
+                                </div>
+                                <div className="text-sm bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                                  {entry.text.split('\n').map((line, i) => (
+                                    <p key={i} className="mt-1 first:mt-0">
+                                      {line}
+                                    </p>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-6 text-gray-500 dark:text-gray-400">
+                          <p>No contributions on this day</p>
+                        </div>
+                      )}
+                    </ScrollArea>
+
+                    {entries.length > 0 && (
+                      <div className="p-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800 rounded-b-lg">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                          Showing all entries for {format(parseISO(date), "MMMM d")}
+                        </div>
+                      </div>
+                    )}
+                  </HoverCardContent>
+                </HoverCard>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-53 gap-1">
-            {contributionData.map((day, index) => (
-              <React.Fragment key={index}>
-                {index % 7 === 0 && index !== 0 && <div className="col-span-1" />}
-                <div
-                  className={`w-3 h-3 rounded-sm ${getColor(day.count)} relative group`}
-                  style={{
-                    gridColumnStart: index === 0 ? getDayOfWeek(day.date) + 1 : "auto",
-                  }}
-                >
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 bg-popover text-popover-foreground text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 shadow-md">
-                    {new Date(day.date).toLocaleDateString(undefined, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                    <br />
-                    {day.count} contribution{day.count !== 1 ? "s" : ""}
-                  </div>
-                </div>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 justify-end">
+        <span className="text-sm text-gray-500">Less</span>
+        {[0, 1, 2, 3, 4].map((level) => (
+          <div
+            key={level}
+            className={`w-3 h-3 rounded-sm ${getContributionColor(level)}`}
+          />
+        ))}
+        <span className="text-sm text-gray-500">More</span>
+      </div>
+    </div>
   )
 }
-
-export default ContributionCalendar
 

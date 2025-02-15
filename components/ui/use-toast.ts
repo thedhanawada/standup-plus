@@ -1,4 +1,9 @@
 import { useState } from "react"
+import { Toast } from "@/components/ui/toast"
+
+interface ToastProps extends Toast {
+  variant?: "default" | "destructive"
+}
 
 interface Toast {
   title: string

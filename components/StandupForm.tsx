@@ -1,29 +1,43 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/components/ui/use-toast"
 import { useStandup } from "@/contexts/StandupContext"
-import { PlusCircle, Loader2 } from "lucide-react"
+import { PlusCircle, Loader2, Calendar, Clock } from "lucide-react"
+import { format } from "date-fns"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
 
 export default function StandupForm() {
   const [entry, setEntry] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [currentDateTime, setCurrentDateTime] = useState<Date | null>(null)
   const { toast } = useToast()
   const { addEntry } = useStandup()
 
+  useEffect(() => {
+    setCurrentDateTime(new Date())
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date())
+    }, 60000)
+
+    return () => clearInterval(timer)
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!entry.trim()) return
-
-    console.log("Submitting new entry:", entry)
+    if (!entry.trim()) {
+      toast({
+        title: "Entry required",
+        description: "Please enter your progress update before saving.",
+      })
+      return
+    }
 
     setIsLoading(true)
-    // Simulating API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate API call
 
     addEntry(entry)
     setEntry("")
@@ -35,19 +49,73 @@ export default function StandupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-card text-card-foreground p-6 rounded-2xl shadow-lg">
-      <h2 className="text-2xl font-bold text-foreground mb-4">Log Your Progress</h2>
-      <Textarea
-        value={entry}
-        onChange={(e) => setEntry(e.target.value)}
-        placeholder="What did you accomplish today? What's your plan for tomorrow?"
-        className="min-h-[150px]"
-      />
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PlusCircle className="mr-2 h-4 w-4" />}
-        Save Update
-      </Button>
-    </form>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-2xl">Log Your Progress</CardTitle>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-muted-foreground">
+          {currentDateTime && (
+            <>
+              <span className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {format(currentDateTime, "EEEE, MMMM d, yyyy")}
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock className="h-4 w-4" />
+                {format(currentDateTime, "h:mm a")}
+              </span>
+            </>
+          )}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="update">Today's Update</Label>
+            <Textarea
+              id="update"
+              value={entry}
+              onChange={(e) => setEntry(e.target.value)}
+              placeholder="What did you accomplish today? What's your plan for tomorrow? Any blockers?"
+              className="min-h-[150px] resize-none p-4 text-base"
+            />
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading || !entry.trim()}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Save Update
+                </>
+              )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline"
+              onClick={() => setEntry("")}
+              disabled={isLoading || !entry.trim()}
+            >
+              Clear
+            </Button>
+          </div>
+
+          {entry.trim().length > 0 && (
+            <div className="text-xs text-muted-foreground text-right">
+              {entry.trim().length} characters
+            </div>
+          )}
+        </form>
+      </CardContent>
+    </Card>
   )
 }
 
