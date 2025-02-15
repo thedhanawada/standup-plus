@@ -8,9 +8,10 @@ import { useToast } from "@/components/ui/use-toast"
 import { useStandup } from "@/contexts/StandupContext"
 import { Edit2, Trash2, Save, X, Clock } from "lucide-react"
 import { format, parseISO } from "date-fns"
+import { TimeDisplay } from "./TimeDisplay"
 
 export default function StandupList() {
-  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
   const [mounted, setMounted] = useState(false)
   const { toast } = useToast()
@@ -20,12 +21,12 @@ export default function StandupList() {
     setMounted(true)
   }, [])
 
-  const handleEdit = (id: number, text: string) => {
+  const handleEdit = (id: string, text: string) => {
     setEditingId(id)
     setEditText(text)
   }
 
-  const handleSave = (id: number) => {
+  const handleSave = (id: string) => {
     updateEntry(id, editText)
     setEditingId(null)
     toast({
@@ -34,7 +35,7 @@ export default function StandupList() {
     })
   }
 
-  const handleDelete = (id: number) => {
+  const handleDelete = (id: string) => {
     deleteEntry(id)
     toast({
       title: "Entry deleted",
@@ -51,16 +52,6 @@ export default function StandupList() {
     groups[date].push(entry)
     return groups
   }, {} as Record<string, typeof entries>)
-
-  const TimeDisplay = ({ date }: { date: string }) => {
-    if (!mounted) return null
-    return (
-      <div className="flex items-center gap-1">
-        <Clock className="h-4 w-4" />
-        {format(parseISO(date), 'h:mm a')}
-      </div>
-    )
-  }
 
   if (!mounted) {
     return null // or a loading skeleton

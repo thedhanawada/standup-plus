@@ -9,6 +9,7 @@ import { PlusCircle, Loader2, Calendar, Clock } from "lucide-react"
 import { format } from "date-fns"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { CurrentTime } from "./CurrentTime"
 
 export default function StandupForm() {
   const [entry, setEntry] = useState("")
@@ -57,10 +58,7 @@ export default function StandupForm() {
             <Calendar className="h-4 w-4" />
             {format(currentDateTime, "EEEE, MMMM d, yyyy")}
           </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" />
-            {format(currentDateTime, "h:mm a")}
-          </span>
+          <CurrentTime />
         </div>
       </CardHeader>
       <CardContent>

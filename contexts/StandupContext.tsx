@@ -2,9 +2,12 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
+import { db } from "@/lib/firebase"
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore"
+import { useAuth } from "./AuthContext"
 
 interface StandupEntry {
-  id: number
+  id: string
   text: string
   date: string
 }
@@ -12,50 +15,80 @@ interface StandupEntry {
 interface StandupContextType {
   entries: StandupEntry[]
   addEntry: (text: string) => void
-  updateEntry: (id: number, text: string) => void
-  deleteEntry: (id: number) => void
+  updateEntry: (id: string, text: string) => void
+  deleteEntry: (id: string) => void
 }
 
 const StandupContext = createContext<StandupContextType | undefined>(undefined)
 
 export function StandupProvider({ children }: { children: React.ReactNode }) {
   const [entries, setEntries] = useState<StandupEntry[]>([])
-  const [mounted, setMounted] = useState(false)
+  const { user } = useAuth()
 
   useEffect(() => {
-    setMounted(true)
-    const savedEntries = JSON.parse(localStorage.getItem("standupEntries") || "[]")
-    setEntries(savedEntries)
-  }, [])
+    if (user) {
+      // Load from Firebase
+      const q = query(collection(db, `users/${user.uid}/standups`))
+      const unsubscribe = onSnapshot(q, (snapshot) => {
+        const firebaseEntries = snapshot.docs.map(doc => ({
+          id: doc.id,
+          text: doc.data().text,
+          date: doc.data().date
+        }))
+        setEntries(firebaseEntries)
+      })
+      return () => unsubscribe()
+    } else {
+      // Load from localStorage
+      const savedEntries = localStorage.getItem("standupEntries")
+      if (savedEntries) {
+        setEntries(JSON.parse(savedEntries))
+      }
+    }
+  }, [user])
 
-  const addEntry = (text: string) => {
-    if (!mounted) return
+  const addEntry = async (text: string) => {
     const newEntry = {
-      id: Date.now(),
-      text: text.trim(),
+      text,
       date: new Date().toISOString(),
     }
-    const updatedEntries = [newEntry, ...entries]
-    setEntries(updatedEntries)
-    localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+
+    if (user) {
+      // Save to Firebase
+      await addDoc(collection(db, `users/${user.uid}/standups`), newEntry)
+    } else {
+      // Save to localStorage
+      const entry = { ...newEntry, id: Date.now().toString() }
+      const updatedEntries = [...entries, entry]
+      setEntries(updatedEntries)
+      localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+    }
   }
 
-  const updateEntry = (id: number, text: string) => {
-    if (!mounted) return
-    const updatedEntries = entries.map((entry) => (entry.id === id ? { ...entry, text } : entry))
-    setEntries(updatedEntries)
-    localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+  const updateEntry = async (id: string, text: string) => {
+    if (user) {
+      // Update in Firebase
+      await updateDoc(doc(db, `users/${user.uid}/standups/${id}`), { text })
+    } else {
+      // Update in localStorage
+      const updatedEntries = entries.map(entry =>
+        entry.id === id ? { ...entry, text } : entry
+      )
+      setEntries(updatedEntries)
+      localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+    }
   }
 
-  const deleteEntry = (id: number) => {
-    if (!mounted) return
-    const updatedEntries = entries.filter((entry) => entry.id !== id)
-    setEntries(updatedEntries)
-    localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
-  }
-
-  if (!mounted) {
-    return null
+  const deleteEntry = async (id: string) => {
+    if (user) {
+      // Delete from Firebase
+      await deleteDoc(doc(db, `users/${user.uid}/standups/${id}`))
+    } else {
+      // Delete from localStorage
+      const updatedEntries = entries.filter(entry => entry.id !== id)
+      setEntries(updatedEntries)
+      localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
+    }
   }
 
   return (
