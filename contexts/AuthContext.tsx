@@ -6,6 +6,7 @@ import { auth, googleProvider, githubProvider } from "@/lib/firebase"
 import { useToast } from "@/components/ui/use-toast"
 import { Github } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
 type AuthContextType = {
   user: User | null
@@ -107,7 +108,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout
     }}>
       {loading ? (
-        <div>Loading...</div>
+        <div className="h-screen w-screen flex items-center justify-center">
+          <LoadingSpinner className="h-8 w-8 text-purple-600" />
+        </div>
       ) : (
         <div>
           {children}
