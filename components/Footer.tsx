@@ -14,7 +14,7 @@ export default function Footer() {
             href="https://github.com/thedhanawada/standup-plus"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-md bg-purple-600 hover:bg-purple-700 px-4 py-2 text-sm font-medium text-white transition-all shadow-lg"
+            className="inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-4 py-2 text-sm font-medium text-white transition-all shadow-lg transform hover:scale-105 duration-200"
           >
             <Github className="h-5 w-5" />
             <span>View on GitHub</span>

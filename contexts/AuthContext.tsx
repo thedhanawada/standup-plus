@@ -4,10 +4,13 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { User, signInWithPopup, signOut } from "firebase/auth"
 import { auth, googleProvider, githubProvider } from "@/lib/firebase"
 import { useToast } from "@/components/ui/use-toast"
+import { Github } from "lucide-react"
+import { useRouter } from "next/navigation"
 
-interface AuthContextType {
+type AuthContextType = {
   user: User | null
   loading: boolean
+  isAuthenticating: boolean
   signInWithGoogle: () => Promise<void>
   signInWithGithub: () => Promise<void>
   logout: () => Promise<void>
@@ -15,10 +18,20 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
   useEffect(() => {
     // Listen for auth state changes
@@ -32,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithGoogle = async () => {
     try {
+      setIsAuthenticating(true)
       await signInWithPopup(auth, googleProvider)
       toast({
         title: "Welcome!",
@@ -43,16 +57,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Sign in failed",
         description: "Could not sign in with Google. Please try again."
       })
+    } finally {
+      setIsAuthenticating(false)
     }
   }
 
   const signInWithGithub = async () => {
     try {
+      setIsAuthenticating(true)
       await signInWithPopup(auth, githubProvider)
-      // Clean URL parameters after successful login
-      if (window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname)
-      }
       toast({
         title: "Welcome!",
         description: "Successfully signed in with GitHub.",
@@ -63,6 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         title: "Sign in failed",
         description: "Could not sign in with GitHub. Please try again."
       })
+    } finally {
+      setIsAuthenticating(false)
     }
   }
 
@@ -86,19 +101,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{
       user,
       loading,
+      isAuthenticating,
       signInWithGoogle,
       signInWithGithub,
       logout
     }}>
-      {children}
+      {loading ? (
+        <div>Loading...</div>
+      ) : (
+        <div>
+          {children}
+        </div>
+      )}
     </AuthContext.Provider>
   )
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider")
-  }
-  return context
 }
