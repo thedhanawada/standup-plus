@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="32" height="32" rx="8" fill="#7C3AED"/>
+  <!-- Speech bubble -->
+  <path d="M8 8C8 7.44772 8.44772 7 9 7H23C23.5523 7 24 7.44772 24 8V18C24 18.5523 23.5523 19 23 19H17L16 22L15 19H9C8.44772 19 8 18.5523 8 18V8Z" fill="white"/>
+  <!-- Upward trend arrow -->
+  <path d="M12 16L16 12L20 16" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg> 
