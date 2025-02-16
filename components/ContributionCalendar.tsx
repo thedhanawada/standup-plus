@@ -9,7 +9,11 @@ import { format, parseISO, getYear, formatDistanceToNow } from "date-fns"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
 
-export default function ContributionCalendar() {
+interface ContributionCalendarProps {
+  onDateClick: (date: string) => void
+}
+
+export default function ContributionCalendar({ onDateClick }: ContributionCalendarProps) {
   const { entries } = useStandup()
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
@@ -95,6 +99,7 @@ export default function ContributionCalendar() {
                   <HoverCardTrigger asChild>
                     <div
                       className={`w-3 h-3 rounded-sm cursor-pointer transition-colors ${getContributionColor(count)}`}
+                      onClick={() => onDateClick(date)}
                     />
                   </HoverCardTrigger>
                   <HoverCardContent 

@@ -3,19 +3,21 @@
 import type React from "react"
 import { createContext, useContext, useState, useEffect } from "react"
 import { db } from "@/lib/firebase"
-import { collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore"
+import { collection, query, onSnapshot, addDoc, deleteDoc, doc, updateDoc, getDoc } from "firebase/firestore"
 import { useAuth } from "./AuthContext"
 
 interface StandupEntry {
   id: string
   text: string
   date: string
+  tags?: string[]
+  projects?: string[]
 }
 
 interface StandupContextType {
   entries: StandupEntry[]
-  addEntry: (text: string) => void
-  updateEntry: (id: string, text: string) => void
+  addEntry: (text: string, tags?: string[], projects?: string[]) => void
+  updateEntry: (id: string, text: string, tags?: string[], projects?: string[]) => void
   deleteEntry: (id: string) => void
 }
 
@@ -30,12 +32,19 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
       // Load from Firebase
       const q = query(collection(db, `users/${user.uid}/standups`))
       const unsubscribe = onSnapshot(q, (snapshot) => {
-        const firebaseEntries = snapshot.docs.map(doc => ({
-          id: doc.id,
-          text: doc.data().text,
-          date: doc.data().date
-        }))
-        setEntries(firebaseEntries)
+        const firebaseEntries = snapshot.docs.map(doc => {
+          const data = doc.data();
+          console.log('Firebase entry data:', { id: doc.id, ...data });
+          return {
+            id: doc.id,
+            text: data.text,
+            date: data.date,
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            projects: Array.isArray(data.projects) ? data.projects : []
+          };
+        });
+        console.log('Processed entries:', firebaseEntries);
+        setEntries(firebaseEntries);
       })
       return () => unsubscribe()
     } else {
@@ -47,15 +56,41 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user])
 
-  const addEntry = async (text: string) => {
+  const addEntry = async (text: string, tags?: string[], projects?: string[]) => {
+    console.log('addEntry called with:', { text, tags, projects });
+    
     const newEntry = {
       text,
       date: new Date().toISOString(),
+      tags: tags || [],
+      projects: projects || []
     }
+    console.log('newEntry constructed:', newEntry);
 
     if (user) {
       // Save to Firebase
-      await addDoc(collection(db, `users/${user.uid}/standups`), newEntry)
+      try {
+        const entryToSave = {
+          text: newEntry.text,
+          date: newEntry.date,
+          tags: Array.isArray(newEntry.tags) ? newEntry.tags : [],
+          projects: Array.isArray(newEntry.projects) ? newEntry.projects : []
+        }
+        console.log('Preparing to save to Firebase:', entryToSave);
+        console.log('Tags type:', typeof entryToSave.tags, 'Projects type:', typeof entryToSave.projects);
+        console.log('Tags is array:', Array.isArray(entryToSave.tags), 'Projects is array:', Array.isArray(entryToSave.projects));
+        console.log('Tags length:', entryToSave.tags.length, 'Projects length:', entryToSave.projects.length);
+        
+        const docRef = await addDoc(collection(db, `users/${user.uid}/standups`), entryToSave);
+        console.log('Successfully saved to Firebase with ID:', docRef.id);
+        
+        // Verify the saved data
+        const savedDoc = await getDoc(docRef);
+        const savedData = savedDoc.data();
+        console.log('Verified saved data:', savedData);
+      } catch (error) {
+        console.error("Error adding entry:", error)
+      }
     } else {
       // Save to localStorage
       const entry = { ...newEntry, id: Date.now().toString() }
@@ -65,14 +100,26 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const updateEntry = async (id: string, text: string) => {
+  const updateEntry = async (id: string, text: string, tags?: string[], projects?: string[]) => {
     if (user) {
       // Update in Firebase
-      await updateDoc(doc(db, `users/${user.uid}/standups/${id}`), { text })
+      try {
+        const updateData = {
+          text,
+          date: new Date().toISOString(),
+          tags: tags || [],
+          projects: projects || []
+        }
+        console.log('Updating entry in Firebase:', { id, updateData });
+        await updateDoc(doc(db, `users/${user.uid}/standups/${id}`), updateData)
+        console.log('Entry updated successfully');
+      } catch (error) {
+        console.error("Error updating entry:", error)
+      }
     } else {
       // Update in localStorage
       const updatedEntries = entries.map(entry =>
-        entry.id === id ? { ...entry, text } : entry
+        entry.id === id ? { ...entry, text, tags, projects } : entry
       )
       setEntries(updatedEntries)
       localStorage.setItem("standupEntries", JSON.stringify(updatedEntries))
@@ -105,4 +152,3 @@ export function useStandup() {
   }
   return context
 }
-
