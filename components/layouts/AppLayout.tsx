@@ -48,7 +48,7 @@ function Overview() {
       <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100">
         <div className="max-w-4xl">
           <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to StandUp+</h1>
-          <p className="text-gray-600 text-lg">Effortlessly track your daily standup updates and maintain a comprehensive log of your progress.</p>
+          <p className="text-gray-600 text-lg">StandUp+ is an open-source tool designed to help you effortlessly track your daily standup updates.</p>
         </div>
       </div>
 
@@ -136,7 +136,7 @@ function Overview() {
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <Code className="h-8 w-8 text-purple-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Open Source</h2>
-          <p className="text-gray-600 text-sm">StandUp+ is an open-source project. Contribute on GitHub and help us improve!</p>
+          <p className="text-gray-600 text-sm">StandUp+ is open-sourced, promoting transparency in its functionalities and fostering community trust.</p>
         </div>
       </div>
 
