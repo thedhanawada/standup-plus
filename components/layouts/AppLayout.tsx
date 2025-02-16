@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/contexts/AuthContext"
 import { 
   PenLine, 
@@ -171,6 +171,10 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [activeView, setActiveView] = useState("overview")
   const { user, signInWithGithub, logout, isAuthenticating, signInWithGoogle } = useAuth()
+
+  useEffect(() => {
+    console.log("AppLayout auth state:", user?.uid, isAuthenticating)
+  }, [user, isAuthenticating])
 
   const handleCalendarClick = (date: string) => {
     // Your logic for handling the date click
