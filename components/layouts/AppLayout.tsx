@@ -13,7 +13,12 @@ import {
   Sparkles,
   Info,
   LayoutDashboard,
-  Code
+  Code,
+  Tag,
+  Briefcase,
+  Search,
+  Cloud,
+  Badge
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -23,6 +28,9 @@ import StandupList from "../StandupList"
 import ContributionCalendar from "../ContributionCalendar"
 import { AuthOverlay } from "@/components/AuthOverlay"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
+import { useStandup } from "@/contexts/StandupContext"
+import { TimeDisplay } from "@/components/TimeDisplay"
+import { badgeVariants } from "@/components/ui/badge"
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", id: "overview" },
@@ -32,34 +40,129 @@ const menuItems = [
 
 function Overview() {
   const { user } = useAuth()
+  const { entries } = useStandup()
   
   return (
-    <div className="space-y-6">
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Welcome to StandUp+</h1>
-        <p className="text-gray-600">Track your daily progress and build a searchable history of your achievements.</p>
+    <div className="space-y-8">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100">
+        <div className="max-w-4xl">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to StandUp+</h1>
+          <p className="text-gray-600 text-lg">Effortlessly track your daily standup updates and maintain a comprehensive log of your progress.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="bg-purple-100 p-3 rounded-lg">
+              <PenLine className="h-6 w-6 text-purple-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">{entries.length}</h3>
+              <p className="text-gray-600">Total Entries</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="bg-pink-100 p-3 rounded-lg">
+              <Tag className="h-6 w-6 text-pink-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {Array.from(new Set(entries.flatMap(e => e.tags || []))).length}
+              </h3>
+              <p className="text-gray-600">Unique Tags</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-4">
+            <div className="bg-indigo-100 p-3 rounded-lg">
+              <Briefcase className="h-6 w-6 text-indigo-600" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">
+                {Array.from(new Set(entries.flatMap(e => e.projects || []))).length}
+              </h3>
+              <p className="text-gray-600">Active Projects</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
           <PenLine className="h-8 w-8 text-purple-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Log Your Progress</h2>
-          <p className="text-gray-600 text-sm">Write daily updates to track your achievements and tasks.</p>
+          <p className="text-gray-600 text-sm">Write daily updates with tags and project categorization to track your achievements and tasks.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <ListTodo className="h-8 w-8 text-purple-600 mb-4" />
-          <h2 className="text-lg font-semibold mb-2">Review History</h2>
-          <p className="text-gray-600 text-sm">Search and browse through your past entries.</p>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Search className="h-8 w-8 text-pink-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Smart Search</h2>
+          <p className="text-gray-600 text-sm">Easily find past entries with powerful search capabilities across text, tags, and projects.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <Calendar className="h-8 w-8 text-purple-600 mb-4" />
-          <h2 className="text-lg font-semibold mb-2">Track Consistency</h2>
-          <p className="text-gray-600 text-sm">Visualize your update patterns over time.</p>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Calendar className="h-8 w-8 text-indigo-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Visual Timeline</h2>
+          <p className="text-gray-600 text-sm">View your contribution patterns and track consistency with an interactive calendar view.</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Tag className="h-8 w-8 text-purple-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Tag Organization</h2>
+          <p className="text-gray-600 text-sm">Organize entries with custom tags to categorize and group related updates.</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Briefcase className="h-8 w-8 text-pink-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Project Tracking</h2>
+          <p className="text-gray-600 text-sm">Associate entries with specific projects to maintain clear project-based progress logs.</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Cloud className="h-8 w-8 text-indigo-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Cloud Sync</h2>
+          <p className="text-gray-600 text-sm">Your entries are automatically synced and backed up when signed in with your account.</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+          <Code className="h-8 w-8 text-purple-600 mb-4" />
+          <h2 className="text-lg font-semibold mb-2">Open Source</h2>
+          <p className="text-gray-600 text-sm">StandUp+ is an open-source project. Contribute on GitHub and help us improve!</p>
         </div>
       </div>
 
+      {/* Recent Activity Section */}
+      {entries.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y">
+            {entries.slice(-3).reverse().map((entry) => (
+              <div key={entry.id} className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <TimeDisplay date={entry.date} />
+                  <div className="flex gap-2">
+                    {entry.tags?.map((tag) => (
+                      <Badge key={tag} className={cn(badgeVariants({ variant: "secondary" }), "flex items-center gap-1 text-xs")}>
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm">{entry.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -69,6 +172,11 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   const [activeView, setActiveView] = useState("overview")
   const { user, signInWithGithub, logout, isAuthenticating, signInWithGoogle } = useAuth()
 
+  const handleCalendarClick = (date: string) => {
+    // Your logic for handling the date click
+    console.log("Date clicked:", date);
+  }
+
   const renderContent = () => {
     switch (activeView) {
       case "overview":
@@ -76,7 +184,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
       case "entries":
         return <StandupList />
       case "calendar":
-        return <ContributionCalendar />
+        return <ContributionCalendar onDateClick={handleCalendarClick} />
       default:
         return <Overview />
     }

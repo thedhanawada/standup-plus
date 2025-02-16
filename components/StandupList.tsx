@@ -14,10 +14,11 @@ import { TimeDisplay } from "./TimeDisplay"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { motion, AnimatePresence } from "framer-motion"
+import { StandupEntry } from "../types"
 
 function StandupListContent() {
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editText, setEditText] = useState("")
+  const [editText, setEditText] = useState<string>('')
   const [editTags, setEditTags] = useState<string[]>([])
   const [editProjects, setEditProjects] = useState<string[]>([])
   const [isSaving, setIsSaving] = useState(false)
@@ -81,52 +82,11 @@ function StandupListContent() {
     setSearchQuery(query)
   }
 
-  const handleEdit = (id: string, text: string, tags: string[] = [], projects: string[] = []) => {
-    console.log('Edit clicked:', { id, text, tags, projects });
-    
-    // Reset delete confirmation if it's showing
-    setShowDeleteConfirm(null);
-    
-    // Verify the entry exists
-    const entry = entries.find(e => e.id === id);
-    if (!entry) {
-      console.error('Entry not found:', id);
-      toast({
-        title: "Error",
-        description: "Could not find the entry to edit. Please refresh the page and try again.",
-      });
-      return;
-    }
-    
-    // First update the form values
-    setEditText(text)
-    setEditTags(tags || [])
-    setEditProjects(projects || [])
-    
-    // Wait for form values to be set before showing the form
-    Promise.resolve().then(() => {
-      // Verify form values are set correctly
-      if (text === editText && 
-          JSON.stringify(tags || []) === JSON.stringify(editTags) && 
-          JSON.stringify(projects || []) === JSON.stringify(editProjects)) {
-        setEditingId(id)
-        console.log('State updated:', { 
-          editingId: id, 
-          editText: text, 
-          editTags: tags, 
-          editProjects: projects 
-        });
-      } else {
-        console.error('Form values not set correctly, retrying...');
-        // Retry setting values
-        setEditText(text)
-        setEditTags(tags || [])
-        setEditProjects(projects || [])
-        requestAnimationFrame(() => {
-          setEditingId(id)
-        })
-      }
-    })
+  const handleEdit = (entry: StandupEntry) => {
+    setEditingId(entry.id);
+    setEditText(entry.text);
+    setEditTags(entry.tags || []);
+    setEditProjects(entry.projects || []);
   }
 
   const handleSave = async (id: string) => {
@@ -338,72 +298,35 @@ function StandupListContent() {
                           <div className="p-6">
                             {editingId === entry.id ? (
                               <div className="space-y-4">
-                                <div className="space-y-4">
-                                  <Textarea
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                    className="min-h-[100px] resize-none p-4 bg-white/50"
-                                  />
-                                  
-                                  <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                      <Tag className="h-4 w-4" />
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {editTags.map((tag) => (
-                                          <Badge key={tag} variant="secondary" className="text-xs gap-1.5 px-2 py-1 bg-white/60 hover:bg-white/80">
-                                            {tag}
-                                            <button onClick={() => setEditTags(editTags.filter(t => t !== tag))}>
-                                              <X className="h-3 w-3" />
-                                            </button>
-                                          </Badge>
-                                        ))}
-                                      </div>
-                                      <div className="flex gap-2">
-                                        <Input
-                                          value={newTag}
-                                          onChange={(e) => setNewTag(e.target.value)}
-                                          placeholder="Add tag"
-                                          className="h-8 w-32 bg-white/50"
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && newTag.trim()) {
-                                              e.preventDefault()
-                                              setEditTags([...editTags, newTag.trim()])
-                                              setNewTag('')
-                                            }
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                      <Briefcase className="h-4 w-4" />
-                                      <div className="flex flex-wrap gap-1.5">
-                                        {editProjects.map((project) => (
-                                          <Badge key={project} variant="secondary" className="text-xs gap-1.5 px-2 py-1 bg-white/60 hover:bg-white/80">
-                                            {project}
-                                            <button onClick={() => setEditProjects(editProjects.filter(p => p !== project))}>
-                                              <X className="h-3 w-3" />
-                                            </button>
-                                          </Badge>
-                                        ))}
-                                      </div>
-                                      <div className="flex gap-2">
-                                        <Input
-                                          value={newProject}
-                                          onChange={(e) => setNewProject(e.target.value)}
-                                          placeholder="Add project"
-                                          className="h-8 w-32 bg-white/50"
-                                          onKeyDown={(e) => {
-                                            if (e.key === 'Enter' && newProject.trim()) {
-                                              e.preventDefault()
-                                              setEditProjects([...editProjects, newProject.trim()])
-                                              setNewProject('')
-                                            }
-                                          }}
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
+                                <Textarea
+                                  value={editText}
+                                  onChange={(e) => setEditText(e.target.value)}
+                                  className="min-h-[100px] resize-none p-4 bg-white/50"
+                                />
+                                <Input
+                                  type="text"
+                                  value={editTags.join(', ')}
+                                  onChange={(e) => setEditTags(e.target.value.split(',').map(tag => tag.trim()))}
+                                  placeholder="Add tags (comma separated)"
+                                />
+                                <Input
+                                  type="text"
+                                  value={editProjects.join(', ')}
+                                  onChange={(e) => setEditProjects(e.target.value.split(',').map(project => project.trim()))}
+                                  placeholder="Add projects (comma separated)"
+                                />
+                                <div className="flex justify-end gap-2">
+                                  <Button
+                                    variant="outline"
+                                    onClick={() => setEditingId(null)}
+                                  >
+                                    Cancel
+                                  </Button>
+                                  <Button
+                                    onClick={() => handleSave(entry.id)}
+                                  >
+                                    Save
+                                  </Button>
                                 </div>
                               </div>
                             ) : (
@@ -414,7 +337,7 @@ function StandupListContent() {
                                     <Button
                                       variant="ghost"
                                       size="sm"
-                                      onClick={() => handleEdit(entry.id, entry.text, entry.tags, entry.projects)}
+                                      onClick={() => handleEdit(entry)}
                                       className="h-8 w-8 p-0 hover:bg-white/60"
                                     >
                                       <Edit2 className="h-4 w-4" />
@@ -459,30 +382,27 @@ function StandupListContent() {
                                     ))}
                                   </div>
                                   
-                                  <div className="flex flex-wrap gap-4 pt-3 border-t border-gray-100">
+                                  {/* Tags and Projects Section */}
+                                  <div className="flex flex-wrap gap-2 mt-2">
                                     {entry.tags && entry.tags.length > 0 && (
-                                      <div className="flex items-center gap-3 mt-3">
-                                        <Tag className="h-5 w-5 text-purple-400" />
-                                        <div className="flex flex-wrap gap-2">
-                                          {entry.tags.map((tag) => (
-                                            <Badge key={tag} className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full hover:bg-purple-100 transition-colors border-none">
-                                              {tag}
-                                            </Badge>
-                                          ))}
-                                        </div>
+                                      <div className="flex flex-wrap gap-1">
+                                        {entry.tags.map((tag) => (
+                                          <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                                            <Tag className="h-3 w-3" />
+                                            {tag}
+                                          </Badge>
+                                        ))}
                                       </div>
                                     )}
                                     
                                     {entry.projects && entry.projects.length > 0 && (
-                                      <div className="flex items-center gap-3">
-                                        <Briefcase className="h-5 w-5 text-blue-400" />
-                                        <div className="flex flex-wrap gap-2">
-                                          {entry.projects.map((project) => (
-                                            <Badge key={project} className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full hover:bg-blue-100 transition-colors border-none">
-                                              {project}
-                                            </Badge>
-                                          ))}
-                                        </div>
+                                      <div className="flex flex-wrap gap-1">
+                                        {entry.projects.map((project) => (
+                                          <Badge key={project} variant="outline" className="flex items-center gap-1">
+                                            <Briefcase className="h-3 w-3" />
+                                            {project}
+                                          </Badge>
+                                        ))}
                                       </div>
                                     )}
                                   </div>
