@@ -214,7 +214,13 @@ export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean 
                   </div>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsOpen(false)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent default form submission
+                      setIsOpen(false);
+                    }}
+                  >
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isLoading}>
