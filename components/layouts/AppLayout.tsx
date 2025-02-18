@@ -235,7 +235,11 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   {isSidebarOpen && <Sparkles className="h-6 w-6 text-purple-600" />}
-                  {isSidebarOpen && <span className="font-bold text-xl">StandUp+</span>}
+                  {isSidebarOpen && (
+                    <span className="font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                      StandUp+
+                    </span>
+                  )}
                 </div>
                 <Button
                   variant="ghost"
@@ -251,18 +255,30 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
             <div className="flex-1">
               <div className="mt-8 space-y-2">
                 {/* Present Menu Item */}
-                <Button
-                  onClick={handlePresentClick}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-6",
-                    user 
-                      ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-700 hover:to-purple-600 shadow-md"
-                      : "bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed"
+                <div className="relative group">
+                  <Button
+                    onClick={handlePresentClick}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-6",
+                      user 
+                        ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-700 hover:to-purple-600 shadow-md"
+                        : "bg-gray-50 border border-gray-200 text-gray-400"
+                    )}
+                  >
+                    <Presentation className="h-5 w-5" />
+                    {isSidebarOpen && <span className="font-medium">Present Standup</span>}
+                  </Button>
+                  
+                  {/* Tooltip */}
+                  {!user && isSidebarOpen && (
+                    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block">
+                      <div className="bg-gray-900 text-white text-sm py-2 px-3 rounded-lg shadow-lg whitespace-nowrap">
+                        Sign in to present your standup
+                        <div className="absolute border-8 border-transparent border-r-gray-900 left-0 top-1/2 -translate-x-full -translate-y-1/2" />
+                      </div>
+                    </div>
                   )}
-                >
-                  <Presentation className="h-5 w-5" />
-                  {isSidebarOpen && <span className="font-medium">Present Standup</span>}
-                </Button>
+                </div>
 
                 {/* Existing Menu Items */}
                 {menuItems.map((item) => (
