@@ -48,7 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithGoogle = async () => {
     try {
       setIsAuthenticating(true)
-      await signInWithPopup(auth, googleProvider)
+      const result = await signInWithPopup(auth, googleProvider)
+      console.log("Google sign in success:", result.user.uid)
       toast({
         title: "Welcome!",
         description: "Successfully signed in with Google.",

@@ -52,82 +52,57 @@ export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!entry.trim()) {
-      toast({
-        title: "Entry required",
-        description: "Please enter your progress update before saving.",
-      })
-      return
-    }
-
-    console.log('Form submission - Current state:', {
-      entry,
-      tags,
-      projects
-    })
+    if (!entry.trim()) return
 
     setIsLoading(true)
-    console.log('Calling addEntry with:', {
-      entry,
-      tags,
-      projects
-    })
-    await addEntry(entry, tags, projects)
+    try {
+      await addEntry(entry, tags, projects)
+      toast({
+        title: "Success! 🎉",
+        description: `Your standup entry has been logged.`,
+      })
+      // Reset form
+      setEntry("")
+      setTags([])
+      setProjects([])
+      setIsOpen(false)
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log standup. Please try again.",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCancel = () => {
+    // Reset form
     setEntry("")
     setTags([])
     setProjects([])
-    setIsLoading(false)
+    setCurrentTag("")
+    setCurrentProject("")
     setIsOpen(false)
-    toast({
-      title: "Entry saved",
-      description: "Your progress update has been saved successfully.",
-    })
   }
 
   return (
-    <>
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-lg z-50 px-6 py-6 transform hover:scale-105 transition-all duration-200"
-      >
-        <PlusCircle className="h-6 w-6 mr-2" />
-        <span className="font-semibold">
-          {user ? `Log Progress, ${user.displayName?.split(' ')[0]}` : 'Log Progress'}
-        </span>
-      </Button>
-
+    <div className={cn("relative", isSidebarOpen ? "ml-64" : "ml-20")}>
       <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black z-50"
-              onClick={() => setIsOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="fixed top-[10%] left-1/2 transform -translate-x-1/2 w-full max-w-2xl bg-white rounded-xl shadow-2xl z-50 p-6 max-h-[80vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-500" />
-                  <span className="font-medium">Log Your Progress</span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <CurrentTime />
-                </div>
-              </div>
-              <form onSubmit={handleSubmit}>
+        {isOpen ? (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed bottom-6 right-6 w-96 bg-white rounded-lg shadow-xl border p-4 z-50"
+          >
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
                 <Textarea
                   value={entry}
                   onChange={(e) => setEntry(e.target.value)}
-                  placeholder="What did you accomplish today?"
-                  className="min-h-[200px] mb-4"
-                  autoFocus
+                  placeholder="What did you work on?"
+                  className="w-full"
                 />
                 
                 <div className="space-y-4 mb-4">
@@ -213,26 +188,46 @@ export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean 
                     </div>
                   </div>
                 </div>
+
                 <div className="flex justify-end gap-2">
-                  <Button variant="outline" onClick={() => setIsOpen(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCancel}
+                  >
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
+                  <Button
+                    type="submit"
+                    disabled={isLoading || !entry.trim()}
+                  >
                     {isLoading ? (
                       <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Saving...
                       </>
                     ) : (
-                      "Save Entry"
+                      <>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        Log Entry
+                      </>
                     )}
                   </Button>
                 </div>
-              </form>
-            </motion.div>
-          </>
+              </div>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.button
+            onClick={() => setIsOpen(true)}
+            className="fixed bottom-6 right-6 bg-purple-600 text-white rounded-full p-4 shadow-lg hover:bg-purple-700 transition-colors"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <PlusCircle className="h-6 w-6" />
+          </motion.button>
         )}
       </AnimatePresence>
-    </>
+    </div>
   )
 }
