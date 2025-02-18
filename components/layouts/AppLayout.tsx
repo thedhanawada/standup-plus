@@ -214,7 +214,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   return (
     <>
       <AuthOverlay show={isAuthenticating} />
-      <div className="min-h-screen flex flex-col">
+      <div className="flex flex-col min-h-screen">
         <div className="flex flex-1">
           {/* Sidebar */}
           <motion.div 
@@ -331,8 +331,8 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
         </div>
 
         {/* Footer */}
-        <footer className="py-8 border-t bg-white">
-          <div className="container mx-auto max-w-5xl px-4">
+        <footer className="py-8 border-t bg-white mt-auto">
+          <div className="container mx-auto max-w-5xl px-4 flex flex-col items-center">
             <div className="flex flex-col items-center space-y-4">
               <p className="text-center text-sm text-gray-600 font-medium tracking-wide">
                 <Code className="inline h-5 w-5 text-purple-600 mr-2" />
