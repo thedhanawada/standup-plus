@@ -37,6 +37,12 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
 import { PresentationWizard } from "../PresentationWizard"
 import { ExportButton } from "@/components/ExportButton"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider
+} from "@/components/ui/tooltip"
 
 
 const menuItems = [
@@ -220,214 +226,224 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   return (
     <>
       <AuthOverlay show={isAuthenticating} />
-      <div className="flex flex-col min-h-screen">
-        <div className="flex flex-1">
-          {/* Sidebar */}
-          <motion.div 
-            className={cn(
-              "fixed left-0 top-0 h-full bg-white shadow-xl z-50 transition-all flex flex-col",
-              isSidebarOpen ? "w-64" : "w-20"
-            )}
-            animate={{ width: isSidebarOpen ? 256 : 80 }}
-          >
-            {/* Header */}
-            <div className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {isSidebarOpen && <Sparkles className="h-6 w-6 text-purple-600" />}
-                  {isSidebarOpen && (
-                    <span className="font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
-                      StandUp+
-                    </span>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSidebarOpen(!isSidebarOpen)}
-                >
-                  {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-                </Button>
-              </div>
-            </div>
-
-            {/* Navigation Menu */}
-            <div className="flex-1">
-              <div className="mt-8 space-y-2">
-                {/* Present Menu Item */}
-                <div className="relative group">
-                  <Button
-                    onClick={handlePresentClick}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-6",
-                      user 
-                        ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-700 hover:to-purple-600 shadow-md"
-                        : "bg-gray-50 border border-gray-200 text-gray-400"
-                    )}
-                  >
-                    <Presentation className="h-5 w-5" />
-                    {isSidebarOpen && <span className="font-medium">Present Standup</span>}
-                  </Button>
-                  
-                  {/* Tooltip */}
-                  {!user && isSidebarOpen && (
-                    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 hidden group-hover:block">
-                      <div className="bg-gray-900 text-white text-sm py-2 px-3 rounded-lg shadow-lg whitespace-nowrap">
-                        Sign in to present your standup
-                        <div className="absolute border-8 border-transparent border-r-gray-900 left-0 top-1/2 -translate-x-full -translate-y-1/2" />
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Existing Menu Items */}
-                {menuItems.map((item) => (
-                  item.id !== "calendar" && (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveView(item.id)}
-                      className={cn(
-                        "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
-                        activeView === item.id 
-                          ? "bg-purple-100 text-purple-700" 
-                          : "hover:bg-gray-100"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {isSidebarOpen && <span>{item.label}</span>}
-                    </button>
-                  )
-                ))}
-              </div>
-            </div>
-
-            {/* Auth Buttons - At bottom */}
-            <div className="p-4 border-t">
-              {user ? (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarImage src={user.photoURL || ''} />
-                      <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
-                    </Avatar>
+      <TooltipProvider>
+        <div className="flex flex-col min-h-screen">
+          <div className="flex flex-1">
+            {/* Sidebar */}
+            <motion.div 
+              className={cn(
+                "fixed left-0 top-0 h-full bg-white shadow-xl z-50 transition-all flex flex-col",
+                isSidebarOpen ? "w-64" : "w-20"
+              )}
+              animate={{ width: isSidebarOpen ? 256 : 80 }}
+            >
+              {/* Header */}
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {isSidebarOpen && <Sparkles className="h-6 w-6 text-purple-600" />}
                     {isSidebarOpen && (
-                      <div className="flex-1 overflow-hidden">
-                        <p className="truncate text-sm font-medium">{user.email}</p>
-                      </div>
+                      <span className="font-bold text-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                        StandUp+
+                      </span>
                     )}
                   </div>
-                  <ExportButton />
                   <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={logout}
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSidebarOpen(!isSidebarOpen)}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {isSidebarOpen && "Sign Out"}
+                    {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                   </Button>
                 </div>
-              ) : (
-                <div className="space-y-2">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={signInWithGithub}
-                  >
-                    <Github className="mr-2 h-4 w-4" />
-                    {isSidebarOpen && "Sign in with GitHub"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start"
-                    onClick={signInWithGoogle}
-                  >
-                    <Mail className="mr-2 h-4 w-4" />
-                    {isSidebarOpen && "Sign in with Google"}
-                  </Button>
+              </div>
+
+              {/* Navigation Menu */}
+              <div className="flex-1">
+                <div className="mt-8 space-y-2">
+                  <Tooltip delayDuration={100}>
+                    <TooltipTrigger asChild>
+                      <Button
+                        onClick={handlePresentClick}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                          user 
+                            ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-700 hover:to-purple-600 shadow-md"
+                            : "bg-gray-50 border border-gray-200 text-gray-400 hover:bg-gray-100"
+                        )}
+                      >
+                        <Presentation className="h-5 w-5" />
+                        {isSidebarOpen && <span className="font-medium">Present Standup</span>}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      side="right" 
+                      className="max-w-[200px] p-3 bg-white shadow-lg border border-gray-200"
+                    >
+                      <div className="space-y-2">
+                        <p className="font-medium text-sm">Sign in Required</p>
+                        <p className="text-xs text-gray-500">
+                          Sign in to:
+                          <ul className="mt-1 ml-4 list-disc">
+                            <li>Present your standup updates</li>
+                            <li>Generate AI summaries</li>
+                            <li>Sync entries across devices</li>
+                            <li>Never lose your data</li>
+                          </ul>
+                        </p>
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  {/* Existing Menu Items */}
+                  {menuItems.map((item) => (
+                    item.id !== "calendar" && (
+                      <button
+                        key={item.id}
+                        onClick={() => setActiveView(item.id)}
+                        className={cn(
+                          "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                          activeView === item.id 
+                            ? "bg-purple-100 text-purple-700" 
+                            : "hover:bg-gray-100"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                        {isSidebarOpen && <span>{item.label}</span>}
+                      </button>
+                    )
+                  ))}
                 </div>
-              )}
-            </div>
-          </motion.div>
-
-          {/* Main Content */}
-          <main className={cn("flex-1 p-6", isSidebarOpen ? "ml-64" : "ml-20")}>
-            {renderContent()}
-          </main>
-        </div>
-
-        {/* Footer */}
-        <footer className={cn(
-          "py-12 mt-auto relative overflow-hidden",
-          isSidebarOpen ? "ml-64" : "ml-20"
-        )}>
-          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-pink-500/5 to-indigo-400/5 backdrop-blur-sm" />
-          
-          {/* Decorative blobs */}
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
-          
-          <div className="max-w-3xl mx-auto px-4 relative">
-            <div className="flex flex-col items-center space-y-8">
-              {/* Logo Section */}
-              <div className="flex items-center gap-3">
-                <div className="bg-white/30 p-2 rounded-xl backdrop-blur-sm border border-white/40 shadow-xl">
-                  <Sparkles className="h-6 w-6 text-purple-600" />
-                </div>
-                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
-                  StandUp+
-                </span>
               </div>
 
-              {/* Open Source Message */}
-              <p className="text-center space-y-2">
-                <span className="block text-gray-700 font-medium">
-                  StandUp+ is built with ❤️ for your progress.
-                </span>
-                <span className="block text-gray-600 text-sm">
-                  It's free, open-source, and always will be, for everyone to use and enjoy.
-                </span>
-              </p>
-
-              {/* Links */}
-              <div className="flex gap-6 items-center">
-                <a
-                  href="https://github.com/thedhanawada/standup-plus"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-gray-50 border border-purple-200 hover:border-purple-300 shadow-md hover:shadow-lg transition-all duration-200"
-                >
-                  <Github className="h-5 w-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors">Star on GitHub</span>
-                </a>
-
-                <a
-                  href="https://github.com/thedhanawada/standup-plus/issues"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-purple-600 transition-colors text-sm"
-                >
-                  Report an Issue
-                </a>
+              {/* Auth Buttons - At bottom */}
+              <div className="p-4 border-t">
+                {user ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={user.photoURL || ''} />
+                        <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      {isSidebarOpen && (
+                        <div className="flex-1 overflow-hidden">
+                          <p className="truncate text-sm font-medium">{user.email}</p>
+                        </div>
+                      )}
+                    </div>
+                    <ExportButton />
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={logout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      {isSidebarOpen && "Sign Out"}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={signInWithGithub}
+                    >
+                      <Github className="mr-2 h-4 w-4" />
+                      {isSidebarOpen && "Sign in with GitHub"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={signInWithGoogle}
+                    >
+                      <Mail className="mr-2 h-4 w-4" />
+                      {isSidebarOpen && "Sign in with Google"}
+                    </Button>
+                  </div>
+                )}
               </div>
+            </motion.div>
 
-              {/* Built with message */}
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <Code className="h-4 w-4" />
-                <span>Built for the community</span>
-              </div>
-            </div>
+            {/* Main Content */}
+            <main className={cn("flex-1 p-6", isSidebarOpen ? "ml-64" : "ml-20")}>
+              {renderContent()}
+            </main>
           </div>
-        </footer>
 
-        {/* StandupForm rendered outside main content */}
-        <StandupForm isSidebarOpen={isSidebarOpen} />
+          {/* Footer */}
+          <footer className={cn(
+            "py-12 mt-auto relative overflow-hidden",
+            isSidebarOpen ? "ml-64" : "ml-20"
+          )}>
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-pink-500/5 to-indigo-400/5 backdrop-blur-sm" />
+            
+            {/* Decorative blobs */}
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+            
+            <div className="max-w-3xl mx-auto px-4 relative">
+              <div className="flex flex-col items-center space-y-8">
+                {/* Logo Section */}
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/30 p-2 rounded-xl backdrop-blur-sm border border-white/40 shadow-xl">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <span className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                    StandUp+
+                  </span>
+                </div>
 
-        {/* Presentation Wizard */}
-        <PresentationWizard 
-          isOpen={isPresentationMode}
-          onClose={() => setIsPresentationMode(false)}
-        />
-      </div>
+                {/* Open Source Message */}
+                <p className="text-center space-y-2">
+                  <span className="block text-gray-700 font-medium">
+                    StandUp+ is built with ❤️ for your progress.
+                  </span>
+                  <span className="block text-gray-600 text-sm">
+                    It's free, open-source, and always will be, for everyone to use and enjoy.
+                  </span>
+                </p>
+
+                {/* Links */}
+                <div className="flex gap-6 items-center">
+                  <a
+                    href="https://github.com/thedhanawada/standup-plus"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-gray-50 border border-purple-200 hover:border-purple-300 shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <Github className="h-5 w-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors">Star on GitHub</span>
+                  </a>
+
+                  <a
+                    href="https://github.com/thedhanawada/standup-plus/issues"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 hover:text-purple-600 transition-colors text-sm"
+                  >
+                    Report an Issue
+                  </a>
+                </div>
+
+                {/* Built with message */}
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Code className="h-4 w-4" />
+                  <span>Built for the community</span>
+                </div>
+              </div>
+            </div>
+          </footer>
+
+          {/* StandupForm rendered outside main content */}
+          <StandupForm isSidebarOpen={isSidebarOpen} />
+
+          {/* Presentation Wizard */}
+          <PresentationWizard 
+            isOpen={isPresentationMode}
+            onClose={() => setIsPresentationMode(false)}
+          />
+        </div>
+      </TooltipProvider>
     </>
   )
 }

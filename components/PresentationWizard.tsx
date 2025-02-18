@@ -8,10 +8,26 @@ import { generateStandupSummary } from "@/lib/gemini"
 import { LoadingSpinner } from "./ui/loading-spinner"
 import { Badge } from "./ui/badge"
 import { Separator } from "./ui/separator"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select"
+import { Label } from "./ui/label"
+import { Switch } from "./ui/switch"
 
 interface PresentationWizardProps {
   isOpen: boolean
   onClose: () => void
+}
+
+// Add new types for summary options
+interface SummaryOptions {
+  style: "concise" | "detailed" | "casual" | "formal"
+  includeMetrics: boolean
+  focusAreas: ("accomplishments" | "blockers" | "next-steps")[]
 }
 
 export function PresentationWizard({ isOpen, onClose }: PresentationWizardProps) {
@@ -19,6 +35,11 @@ export function PresentationWizard({ isOpen, onClose }: PresentationWizardProps)
   const [isLoading, setIsLoading] = useState(false)
   const [summary, setSummary] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [summaryOptions, setSummaryOptions] = useState<SummaryOptions>({
+    style: "concise",
+    includeMetrics: true,
+    focusAreas: ["accomplishments", "blockers", "next-steps"]
+  })
   
   // Filter entries for today
   const todayEntries = entries.filter(entry => isToday(parseISO(entry.date)))
@@ -27,7 +48,7 @@ export function PresentationWizard({ isOpen, onClose }: PresentationWizardProps)
     setIsLoading(true)
     setError(null)
     try {
-      const generatedSummary = await generateStandupSummary(todayEntries)
+      const generatedSummary = await generateStandupSummary(todayEntries, summaryOptions)
       setSummary(generatedSummary)
     } catch (err) {
       setError('Failed to generate summary. Please try again.')
@@ -60,71 +81,132 @@ export function PresentationWizard({ isOpen, onClose }: PresentationWizardProps)
                 {todayEntries.length} entries from today
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={generateSummary}
-                className="gap-2"
-                disabled={isLoading}
-              >
-                <Sparkles className="h-4 w-4" />
-                {summary ? "Summarize Again" : "Summarize with AI"}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
 
           <div className="space-y-6 mt-4">
+            {/* Summary Options Section - Show when no summary or when summary exists */}
+            {!isLoading && (
+              <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+                <h3 className="font-medium text-lg">
+                  {summary ? "Regenerate Summary" : "Generate AI Summary"}
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Summary Style</Label>
+                    <Select
+                      value={summaryOptions.style}
+                      onValueChange={(value: SummaryOptions["style"]) => 
+                        setSummaryOptions(prev => ({ ...prev, style: value }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="concise">Concise</SelectItem>
+                        <SelectItem value="detailed">Detailed</SelectItem>
+                        <SelectItem value="casual">Casual</SelectItem>
+                        <SelectItem value="formal">Formal</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label>Include Metrics</Label>
+                    <Switch
+                      checked={summaryOptions.includeMetrics}
+                      onCheckedChange={(checked) =>
+                        setSummaryOptions(prev => ({ ...prev, includeMetrics: checked }))
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Focus Areas</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {["accomplishments", "blockers", "next-steps"].map((area) => (
+                        <Button
+                          key={area}
+                          variant={summaryOptions.focusAreas.includes(area as any) ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => {
+                            setSummaryOptions(prev => ({
+                              ...prev,
+                              focusAreas: prev.focusAreas.includes(area as any)
+                                ? prev.focusAreas.filter(a => a !== area)
+                                : [...prev.focusAreas, area as any]
+                            }))
+                          }}
+                        >
+                          {area.charAt(0).toUpperCase() + area.slice(1).replace("-", " ")}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={generateSummary}
+                    className="w-full mt-4"
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    {summary ? "Regenerate Summary" : "Generate Summary"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* AI Summary Section */}
             {(isLoading || summary) && (
-              <>
-                <div className="bg-purple-50 rounded-lg p-6">
-                  {isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-[100px] space-y-4">
-                      <LoadingSpinner />
-                      <p className="text-sm text-gray-500">Generating AI summary...</p>
-                    </div>
-                  ) : error ? (
-                    <div className="text-red-500 text-center">
-                      <p>{error}</p>
-                      <Button
-                        variant="outline"
-                        onClick={generateSummary}
-                        className="mt-4"
-                      >
-                        Try Again
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="prose prose-purple max-w-none">
-                      {summary && summary.split('\n').map((line, i) => {
-                        // Handle headers
-                        if (line.startsWith('##')) {
-                          return <h2 key={i} className="text-xl font-bold mt-4 mb-2">{line.replace('##', '')}</h2>
-                        }
-                        // Handle bold sections
-                        if (line.startsWith('**')) {
-                          return <h3 key={i} className="font-bold text-purple-700 mt-4 mb-2">
-                            {line.replace(/\*\*/g, '')}
-                          </h3>
-                        }
-                        // Handle bullet points
-                        if (line.startsWith('*')) {
-                          return <li key={i} className="ml-4 mt-1">{line.replace('*', '').trim()}</li>
-                        }
-                        // Regular text
-                        return <p key={i} className="mt-2 first:mt-0">{line}</p>
-                      })}
-                    </div>
-                  )}
-                </div>
-                <Separator />
-              </>
+              <div className="bg-purple-50 rounded-lg p-6">
+                {isLoading ? (
+                  <div className="flex flex-col items-center justify-center h-[100px] space-y-4">
+                    <LoadingSpinner />
+                    <p className="text-sm text-gray-500">
+                      {summary ? "Regenerating summary..." : "Generating AI summary..."}
+                    </p>
+                  </div>
+                ) : error ? (
+                  <div className="text-red-500 text-center">
+                    <p>{error}</p>
+                    <Button
+                      variant="outline"
+                      onClick={generateSummary}
+                      className="mt-4"
+                    >
+                      Try Again
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="prose prose-purple max-w-none">
+                    {summary && summary.split('\n').map((line, i) => {
+                      // Handle headers
+                      if (line.startsWith('##')) {
+                        return <h2 key={i} className="text-xl font-bold mt-4 mb-2">{line.replace('##', '')}</h2>
+                      }
+                      // Handle bold sections
+                      if (line.startsWith('**')) {
+                        return <h3 key={i} className="font-bold text-purple-700 mt-4 mb-2">
+                          {line.replace(/\*\*/g, '')}
+                        </h3>
+                      }
+                      // Handle bullet points
+                      if (line.startsWith('*')) {
+                        return <li key={i} className="ml-4 mt-1">{line.replace('*', '').trim()}</li>
+                      }
+                      // Regular text
+                      return <p key={i} className="mt-2 first:mt-0">{line}</p>
+                    })}
+                  </div>
+                )}
+              </div>
             )}
 
             {/* Original Entries Section */}

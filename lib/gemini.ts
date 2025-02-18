@@ -11,7 +11,16 @@ interface GeminiResponse {
   }>;
 }
 
-export async function generateStandupSummary(entries: StandupEntry[]): Promise<string> {
+interface SummaryOptions {
+  style: "concise" | "detailed" | "casual" | "formal"
+  includeMetrics: boolean
+  focusAreas: ("accomplishments" | "blockers" | "next-steps")[]
+}
+
+export async function generateStandupSummary(
+  entries: StandupEntry[], 
+  options: SummaryOptions
+): Promise<string> {
   const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
   
   // Format the entries into a clear prompt
@@ -23,18 +32,42 @@ Projects: ${entry.projects?.join(', ') || 'none'}
 `)
     .join('\n\n');
 
-  const prompt = `Please create a concise, well-structured standup presentation from these updates:
+  // Generate style instruction
+  const styleGuide = {
+    concise: "Keep it brief and to the point",
+    detailed: "Provide comprehensive details and context",
+    casual: "Use a conversational, friendly tone",
+    formal: "Maintain a professional, business-like tone"
+  }[options.style]
+
+  // Generate metrics instruction
+  const metricsInstruction = options.includeMetrics
+    ? "Include relevant metrics such as number of tasks completed, projects touched, etc."
+    : "Skip numerical metrics"
+
+  // Generate focus areas
+  const focusAreasText = options.focusAreas
+    .map(area => {
+      switch(area) {
+        case "accomplishments": return "Key accomplishments and completed tasks"
+        case "blockers": return "Challenges and blockers"
+        case "next-steps": return "Next steps and upcoming work"
+      }
+    })
+    .join("\n- ")
+
+  const prompt = `Please create a standup presentation summary from these updates:
 
 ${entriesText}
 
-Format the response as a presentation script with:
-1. A brief overview
-2. Key accomplishments
-3. Current focus areas
-4. Any blockers or challenges
-5. Next steps
+Style Instructions:
+- ${styleGuide}
+- ${metricsInstruction}
 
-Keep it professional but conversational.`;
+Focus on these areas:
+- ${focusAreasText}
+
+Format the response as a presentation script that's easy to read and present.`;
 
   try {
     const response = await fetch(
