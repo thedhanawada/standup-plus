@@ -3,12 +3,20 @@
 import { Github, Code } from "lucide-react"
 
 export default function Footer() {
+  const version = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0"; // Default version if not set
+
   return (
     <footer className="w-full py-8 mt-12 border-t bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100">
       <div className="container mx-auto max-w-5xl px-4">
         <div className="flex flex-col items-center space-y-6">
           <p className="text-center text-sm text-muted-foreground">
-            <Code className="inline h-5 w-5 text-purple-600" /> StandUp+ is an open source tool
+            <Code className="inline h-5 w-5 text-purple-600" /> StandUp+ is an open-source tool
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Version: {version}
+          </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Project: <strong>standup-plus</strong>
           </p>
           <a
             href="https://github.com/thedhanawada/standup-plus"
