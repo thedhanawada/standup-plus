@@ -19,7 +19,8 @@ import {
   Search,
   Cloud,
   Badge,
-  Mail
+  Mail,
+  Presentation
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -33,6 +34,7 @@ import { useStandup } from "@/contexts/StandupContext"
 import { TimeDisplay } from "@/components/TimeDisplay"
 import { badgeVariants } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { useToast } from "@/components/ui/use-toast"
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", id: "overview" },
@@ -173,6 +175,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   const [isSidebarOpen, setSidebarOpen] = useState(true)
   const [activeView, setActiveView] = useState("overview")
   const { user, signInWithGithub, logout, isAuthenticating, signInWithGoogle } = useAuth()
+  const { toast } = useToast()
 
   useEffect(() => {
     console.log("AppLayout auth state:", user?.uid, isAuthenticating)
@@ -181,6 +184,18 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   const handleCalendarClick = (date: string) => {
     // Your logic for handling the date click
     console.log("Date clicked:", date);
+  }
+
+  const handlePresentClick = () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to present your standup",
+      })
+      return
+    }
+    // Add your presentation logic here
+    setActiveView("present")
   }
 
   const renderContent = () => {
@@ -213,7 +228,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
             <div className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="h-6 w-6 text-purple-600" />
+                  {isSidebarOpen && <Sparkles className="h-6 w-6 text-purple-600" />}
                   {isSidebarOpen && <span className="font-bold text-xl">StandUp+</span>}
                 </div>
                 <Button
@@ -229,12 +244,27 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
             {/* Navigation Menu */}
             <div className="flex-1">
               <div className="mt-8 space-y-2">
+                {/* Present Menu Item */}
+                <button
+                  onClick={handlePresentClick}
+                  className={cn(
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-6",
+                    user 
+                      ? "bg-gradient-to-r from-purple-600 to-purple-500 text-white hover:from-purple-700 hover:to-purple-600 shadow-md"
+                      : "bg-gray-50 border border-gray-200 text-gray-400 cursor-not-allowed"
+                  )}
+                >
+                  <Presentation className="h-5 w-5" />
+                  {isSidebarOpen && <span className="font-medium">Present</span>}
+                </button>
+
+                {/* Existing Menu Items */}
                 {menuItems.map((item) => (
                   <button
                     key={item.id}
                     onClick={() => setActiveView(item.id)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all",
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
                       activeView === item.id 
                         ? "bg-purple-100 text-purple-700" 
                         : "hover:bg-gray-100"
