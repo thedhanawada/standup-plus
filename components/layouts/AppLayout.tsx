@@ -36,6 +36,7 @@ import { badgeVariants } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
 import { PresentationWizard } from "../PresentationWizard"
+import { ExportButton } from "@/components/ExportButton"
 
 
 const menuItems = [
@@ -45,22 +46,61 @@ const menuItems = [
 ]
 
 function Overview() {
-  const { user } = useAuth()
+  const { user, signInWithGithub } = useAuth()
   const { entries } = useStandup()
   
   return (
     <div className="space-y-8">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-8 rounded-2xl border border-purple-100">
-        <div className="max-w-4xl">
-          <h1 className="text-3xl font-bold text-gray-900 mb-3">Welcome to StandUp+</h1>
-          <p className="text-gray-600 text-lg">StandUp+ is an open-source tool designed to help you effortlessly track your daily standup updates.</p>
+      <div className="relative overflow-hidden rounded-3xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-500/20 to-indigo-400/20 backdrop-blur-xl" />
+        <div className="absolute inset-0 bg-white/40" />
+        <div className="relative px-8 py-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center space-y-6">
+              <div className="bg-white/30 p-3 rounded-2xl backdrop-blur-sm border border-white/40 shadow-xl">
+                <Sparkles className="h-8 w-8 text-purple-600" />
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                Welcome to StandUp+
+              </h1>
+              <p className="text-2xl font-medium text-gray-700">
+                See Your Progress, Clearly.
+              </p>
+              <p className="text-lg text-gray-600 max-w-2xl leading-relaxed">
+                StandUp+ is your open-source tool for effortless tracking and real results.
+              </p>
+              {!user && (
+                <div className="flex gap-4 mt-4">
+                  <Button 
+                    onClick={signInWithGithub}
+                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <Github className="mr-2 h-5 w-5" />
+                    Get Started
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="border-purple-200 hover:border-purple-300 shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
+                    <Info className="mr-2 h-5 w-5" />
+                    Learn More
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
+        
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob" />
+        <div className="absolute top-0 right-0 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+        <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000" />
       </div>
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-4">
             <div className="bg-purple-100 p-3 rounded-lg">
               <PenLine className="h-6 w-6 text-purple-600" />
@@ -72,7 +112,7 @@ function Overview() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-4">
             <div className="bg-pink-100 p-3 rounded-lg">
               <Tag className="h-6 w-6 text-pink-600" />
@@ -86,7 +126,7 @@ function Overview() {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <div className="flex items-center gap-4">
             <div className="bg-indigo-100 p-3 rounded-lg">
               <Briefcase className="h-6 w-6 text-indigo-600" />
@@ -101,74 +141,47 @@ function Overview() {
         </div>
       </div>
 
+      {/* Contribution Calendar Section */}
+      <ContributionCalendar onDateClick={(date) => console.log(date)} />
+
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <PenLine className="h-8 w-8 text-purple-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Log Your Progress</h2>
           <p className="text-gray-600 text-sm">Write daily updates with tags and project categorization to track your achievements and tasks.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <Search className="h-8 w-8 text-pink-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Smart Search</h2>
           <p className="text-gray-600 text-sm">Easily find past entries with powerful search capabilities across text, tags, and projects.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <Calendar className="h-8 w-8 text-indigo-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Visual Timeline</h2>
-          <p className="text-gray-600 text-sm">View your contribution patterns and track consistency with an interactive calendar view.</p>
+          <p className="text-gray-600 text-sm">View your progress over time with a visual representation of your entries.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <Tag className="h-8 w-8 text-purple-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Tag Organization</h2>
           <p className="text-gray-600 text-sm">Organize entries with custom tags to categorize and group related updates.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <Briefcase className="h-8 w-8 text-pink-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Project Tracking</h2>
           <p className="text-gray-600 text-sm">Associate entries with specific projects to maintain clear project-based progress logs.</p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
           <Cloud className="h-8 w-8 text-indigo-600 mb-4" />
           <h2 className="text-lg font-semibold mb-2">Cloud Sync</h2>
           <p className="text-gray-600 text-sm">Your entries are automatically synced and backed up when signed in with your account.</p>
         </div>
-
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-          <Code className="h-8 w-8 text-purple-600 mb-4" />
-          <h2 className="text-lg font-semibold mb-2">Open Source</h2>
-          <p className="text-gray-600 text-sm">StandUp+ is open-sourced, promoting transparency in its functionalities and fostering community trust.</p>
-        </div>
       </div>
-
-      {/* Recent Activity Section */}
-      {entries.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 divide-y">
-            {entries.slice(-3).reverse().map((entry) => (
-              <div key={entry.id} className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <TimeDisplay date={entry.date} />
-                  <div className="flex gap-2">
-                    {entry.tags?.map((tag) => (
-                      <Badge key={tag} className={cn(badgeVariants({ variant: "secondary" }), "flex items-center gap-1 text-xs")}>
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-gray-600 text-sm">{entry.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -206,8 +219,6 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
         return <Overview />
       case "entries":
         return <StandupList />
-      case "calendar":
-        return <ContributionCalendar onDateClick={handleCalendarClick} />
       default:
         return <Overview />
     }
@@ -262,19 +273,21 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
 
                 {/* Existing Menu Items */}
                 {menuItems.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveView(item.id)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
-                      activeView === item.id 
-                        ? "bg-purple-100 text-purple-700" 
-                        : "hover:bg-gray-100"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5" />
-                    {isSidebarOpen && <span>{item.label}</span>}
-                  </button>
+                  item.id !== "calendar" && (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveView(item.id)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all",
+                        activeView === item.id 
+                          ? "bg-purple-100 text-purple-700" 
+                          : "hover:bg-gray-100"
+                      )}
+                    >
+                      <item.icon className="h-5 w-5" />
+                      {isSidebarOpen && <span>{item.label}</span>}
+                    </button>
+                  )
                 ))}
               </div>
             </div>
@@ -294,6 +307,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
                       </div>
                     )}
                   </div>
+                  <ExportButton />
                   <Button
                     variant="outline"
                     className="w-full justify-start"
@@ -333,22 +347,65 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
         </div>
 
         {/* Footer */}
-        <footer className="py-8 border-t bg-white mt-auto">
-          <div className="container mx-auto max-w-5xl px-4 flex flex-col items-center">
-            <div className="flex flex-col items-center space-y-4">
-              <p className="text-center text-sm text-gray-600 font-medium tracking-wide">
-                <Code className="inline h-5 w-5 text-purple-600 mr-2" />
-                For the community
+        <footer className={cn(
+          "py-12 mt-auto relative overflow-hidden",
+          isSidebarOpen ? "ml-64" : "ml-20"
+        )}>
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-pink-500/5 to-indigo-400/5 backdrop-blur-sm" />
+          
+          {/* Decorative blobs */}
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000" />
+          
+          <div className="max-w-3xl mx-auto px-4 relative">
+            <div className="flex flex-col items-center space-y-8">
+              {/* Logo Section */}
+              <div className="flex items-center gap-3">
+                <div className="bg-white/30 p-2 rounded-xl backdrop-blur-sm border border-white/40 shadow-xl">
+                  <Sparkles className="h-6 w-6 text-purple-600" />
+                </div>
+                <span className="text-xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent">
+                  StandUp+
+                </span>
+              </div>
+
+              {/* Open Source Message */}
+              <p className="text-center space-y-2">
+                <span className="block text-gray-700 font-medium">
+                  StandUp+ is built with ❤️ for your progress.
+                </span>
+                <span className="block text-gray-600 text-sm">
+                  It's free, open-source, and always will be, for everyone to use and enjoy.
+                </span>
               </p>
-              <a
-                href="https://github.com/thedhanawada/standup-plus"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-white border border-purple-200 hover:border-purple-400 px-6 py-2.5 text-sm font-medium text-purple-600 transition-all shadow-sm hover:shadow-md"
-              >
-                <Github className="h-5 w-5" />
-                <span>View on GitHub</span>
-              </a>
+
+              {/* Links */}
+              <div className="flex gap-6 items-center">
+                <a
+                  href="https://github.com/thedhanawada/standup-plus"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex items-center gap-2 px-6 py-2.5 rounded-full bg-white hover:bg-gray-50 border border-purple-200 hover:border-purple-300 shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <Github className="h-5 w-5 text-gray-700 group-hover:text-purple-600 transition-colors" />
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-purple-600 transition-colors">Star on GitHub</span>
+                </a>
+
+                <a
+                  href="https://github.com/thedhanawada/standup-plus/issues"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-purple-600 transition-colors text-sm"
+                >
+                  Report an Issue
+                </a>
+              </div>
+
+              {/* Built with message */}
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Code className="h-4 w-4" />
+                <span>Built for the community</span>
+              </div>
             </div>
           </div>
         </footer>
