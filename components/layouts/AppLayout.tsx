@@ -18,7 +18,8 @@ import {
   Briefcase,
   Search,
   Cloud,
-  Badge
+  Badge,
+  Mail
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -31,6 +32,7 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { useStandup } from "@/contexts/StandupContext"
 import { TimeDisplay } from "@/components/TimeDisplay"
 import { badgeVariants } from "@/components/ui/badge"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", id: "overview" },
@@ -197,118 +199,127 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   return (
     <>
       <AuthOverlay show={isAuthenticating} />
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <motion.div 
-          className={cn(
-            "fixed left-0 top-0 h-full bg-white shadow-xl z-50 transition-all",
-            isSidebarOpen ? "w-64" : "w-20"
-          )}
-          animate={{ width: isSidebarOpen ? 256 : 80 }}
-        >
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-purple-600" />
-                {isSidebarOpen && <span className="font-bold text-xl">StandUp+</span>}
-              </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarOpen(!isSidebarOpen)}
-              >
-                {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-              </Button>
-            </div>
-
-            <div className="mt-8 space-y-2">
-              {menuItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveView(item.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all",
-                    activeView === item.id 
-                      ? "bg-purple-100 text-purple-700" 
-                      : "hover:bg-gray-100"
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  {isSidebarOpen && <span>{item.label}</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            {user ? (
-              <Button 
-                variant="outline" 
-                onClick={logout}
-                className="w-full"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                {isSidebarOpen && "Sign Out"}
-              </Button>
-            ) : (
-              <Button 
-                onClick={signInWithGithub}
-                className="w-full"
-                disabled={isAuthenticating}
-              >
-                {isAuthenticating ? (
-                  <LoadingSpinner className="h-4 w-4 mr-2" />
-                ) : (
-                  <Github className="h-4 w-4 mr-2" />
-                )}
-                {isSidebarOpen && (isAuthenticating ? "Signing in..." : "Sign In")}
-              </Button>
+      <div className="min-h-screen flex flex-col">
+        <div className="flex flex-1">
+          {/* Sidebar */}
+          <motion.div 
+            className={cn(
+              "fixed left-0 top-0 h-full bg-white shadow-xl z-50 transition-all flex flex-col",
+              isSidebarOpen ? "w-64" : "w-20"
             )}
-          </div>
-        </motion.div>
-
-        {/* Main Content Wrapper */}
-        <div className={cn(
-          "flex flex-col min-h-screen w-full",
-          isSidebarOpen ? "ml-64" : "ml-20"
-        )}>
-          {/* Content Area */}
-          <div className="flex-grow p-8 pb-32">
-            <div className="max-w-6xl mx-auto">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeView}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.2 }}
+            animate={{ width: isSidebarOpen ? 256 : 80 }}
+          >
+            {/* Header */}
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-purple-600" />
+                  {isSidebarOpen && <span className="font-bold text-xl">StandUp+</span>}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSidebarOpen(!isSidebarOpen)}
                 >
-                  {renderContent()}
-                </motion.div>
-              </AnimatePresence>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <footer className="py-8 border-t bg-gradient-to-r from-indigo-100 via-purple-100 to-pink-100 relative z-0">
-            <div className="container mx-auto max-w-5xl px-4">
-              <div className="flex flex-col items-center space-y-6">
-                <p className="text-center text-sm text-muted-foreground">
-                  <Code className="inline h-5 w-5 text-purple-600" /> StandUp+ is an open source project
-                </p>
-                <a
-                  href="https://github.com/thedhanawada/standup-plus"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-md bg-purple-600 hover:bg-purple-700 px-4 py-2 text-sm font-medium text-white transition-all shadow-lg"
-                >
-                  <Github className="h-5 w-5" />
-                  <span>View on GitHub</span>
-                </a>
+                  {isSidebarOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+                </Button>
               </div>
             </div>
-          </footer>
+
+            {/* Navigation Menu */}
+            <div className="flex-1">
+              <div className="mt-8 space-y-2">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveView(item.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all",
+                      activeView === item.id 
+                        ? "bg-purple-100 text-purple-700" 
+                        : "hover:bg-gray-100"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    {isSidebarOpen && <span>{item.label}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Auth Buttons - At bottom */}
+            <div className="p-4 border-t">
+              {user ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage src={user.photoURL || ''} />
+                      <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    {isSidebarOpen && (
+                      <div className="flex-1 overflow-hidden">
+                        <p className="truncate text-sm font-medium">{user.email}</p>
+                      </div>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={logout}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    {isSidebarOpen && "Sign Out"}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={signInWithGithub}
+                  >
+                    <Github className="mr-2 h-4 w-4" />
+                    {isSidebarOpen && "Sign in with GitHub"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={signInWithGoogle}
+                  >
+                    <Mail className="mr-2 h-4 w-4" />
+                    {isSidebarOpen && "Sign in with Google"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Main Content */}
+          <main className={cn("flex-1 p-6", isSidebarOpen ? "ml-64" : "ml-20")}>
+            {renderContent()}
+          </main>
         </div>
+
+        {/* Footer */}
+        <footer className="py-8 border-t bg-white">
+          <div className="container mx-auto max-w-5xl px-4">
+            <div className="flex flex-col items-center space-y-4">
+              <p className="text-center text-sm text-gray-600 font-medium tracking-wide">
+                <Code className="inline h-5 w-5 text-purple-600 mr-2" />
+                For the community
+              </p>
+              <a
+                href="https://github.com/thedhanawada/standup-plus"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-white border border-purple-200 hover:border-purple-400 px-6 py-2.5 text-sm font-medium text-purple-600 transition-all shadow-sm hover:shadow-md"
+              >
+                <Github className="h-5 w-5" />
+                <span>View on GitHub</span>
+              </a>
+            </div>
+          </div>
+        </footer>
 
         {/* StandupForm rendered outside main content */}
         <StandupForm isSidebarOpen={isSidebarOpen} />
