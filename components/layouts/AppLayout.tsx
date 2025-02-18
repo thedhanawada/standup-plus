@@ -79,13 +79,6 @@ function Overview() {
                     <Github className="mr-2 h-5 w-5" />
                     Get Started
                   </Button>
-                  <Button 
-                    variant="outline"
-                    className="border-purple-200 hover:border-purple-300 shadow-lg hover:shadow-xl transition-all duration-200"
-                  >
-                    <Info className="mr-2 h-5 w-5" />
-                    Learn More
-                  </Button>
                 </div>
               )}
             </div>
