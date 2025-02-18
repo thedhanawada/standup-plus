@@ -35,6 +35,8 @@ import { TimeDisplay } from "@/components/TimeDisplay"
 import { badgeVariants } from "@/components/ui/badge"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { useToast } from "@/components/ui/use-toast"
+import { PresentationWizard } from "../PresentationWizard"
+
 
 const menuItems = [
   { icon: LayoutDashboard, label: "Overview", id: "overview" },
@@ -176,6 +178,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
   const [activeView, setActiveView] = useState("overview")
   const { user, signInWithGithub, logout, isAuthenticating, signInWithGoogle } = useAuth()
   const { toast } = useToast()
+  const [isPresentationMode, setIsPresentationMode] = useState(false)
 
   useEffect(() => {
     console.log("AppLayout auth state:", user?.uid, isAuthenticating)
@@ -194,8 +197,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
       })
       return
     }
-    // Add your presentation logic here
-    setActiveView("present")
+    setIsPresentationMode(true)
   }
 
   const renderContent = () => {
@@ -245,7 +247,7 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
             <div className="flex-1">
               <div className="mt-8 space-y-2">
                 {/* Present Menu Item */}
-                <button
+                <Button
                   onClick={handlePresentClick}
                   className={cn(
                     "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all mb-6",
@@ -255,8 +257,8 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
                   )}
                 >
                   <Presentation className="h-5 w-5" />
-                  {isSidebarOpen && <span className="font-medium">Present</span>}
-                </button>
+                  {isSidebarOpen && <span className="font-medium">Present Standup</span>}
+                </Button>
 
                 {/* Existing Menu Items */}
                 {menuItems.map((item) => (
@@ -353,6 +355,12 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
 
         {/* StandupForm rendered outside main content */}
         <StandupForm isSidebarOpen={isSidebarOpen} />
+
+        {/* Presentation Wizard */}
+        <PresentationWizard 
+          isOpen={isPresentationMode}
+          onClose={() => setIsPresentationMode(false)}
+        />
       </div>
     </>
   )
