@@ -423,121 +423,146 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
                 </div>
               </div>
 
+              {/* Auth Section */}
+              {!user && (
+                <div className={cn(
+                  "mt-auto",
+                  isSidebarOpen ? "px-3 pb-4" : "px-2 pb-3"
+                )}>
+                  <div className={cn(
+                    "rounded-xl bg-gray-50/80 border border-gray-100",
+                    isSidebarOpen ? "p-3" : "p-2"
+                  )}>
+                    {isSidebarOpen && (
+                      <div className="mb-3 px-1">
+                        <h3 className="font-medium text-gray-900">Sign in</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">Continue with</p>
+                      </div>
+                    )}
+                    <div className={cn(
+                      "grid gap-2",
+                      isSidebarOpen ? "grid-cols-2" : "grid-cols-1"
+                    )}>
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={signInWithGithub}
+                            variant="outline"
+                            className={cn(
+                              "transition-all duration-200 border-gray-200/50 hover:border-gray-300 hover:bg-white",
+                              isSidebarOpen 
+                                ? "h-9 text-sm px-3" 
+                                : "h-9 w-9 p-0 flex items-center justify-center"
+                            )}
+                          >
+                            <Github className={cn(
+                              "transition-transform duration-200",
+                              isSidebarOpen ? "h-4 w-4 mr-2" : "h-4 w-4"
+                            )} />
+                            {isSidebarOpen && "GitHub"}
+                          </Button>
+                        </TooltipTrigger>
+                        {!isSidebarOpen && (
+                          <TooltipContent side="right" className="font-medium">
+                            Sign in with GitHub
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+
+                      <Tooltip delayDuration={100}>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={signInWithGoogle}
+                            variant="outline"
+                            className={cn(
+                              "transition-all duration-200 border-gray-200/50 hover:border-gray-300 hover:bg-white",
+                              isSidebarOpen 
+                                ? "h-9 text-sm px-3" 
+                                : "h-9 w-9 p-0 flex items-center justify-center"
+                            )}
+                          >
+                            <Mail className={cn(
+                              "transition-transform duration-200",
+                              isSidebarOpen ? "h-4 w-4 mr-2" : "h-4 w-4"
+                            )} />
+                            {isSidebarOpen && "Google"}
+                          </Button>
+                        </TooltipTrigger>
+                        {!isSidebarOpen && (
+                          <TooltipContent side="right" className="font-medium">
+                            Sign in with Google
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* User Profile Section */}
-              <div className={cn(
-                "mt-auto border-t border-purple-100/50 bg-gradient-to-t from-purple-50/50 to-transparent",
-                isSidebarOpen ? "p-4" : "p-2"
-              )}>
-                {user ? (
-                  <div className="space-y-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <div className={cn(
-                          "flex items-center gap-3 rounded-lg bg-white/50 border border-purple-100/50 cursor-pointer hover:bg-white/80 transition-colors duration-200",
-                          isSidebarOpen ? "p-2" : "p-1.5 justify-center"
+              {user && (
+                <div className={cn(
+                  "mt-auto border-t border-purple-100/50 bg-gradient-to-t from-purple-50/50 to-transparent",
+                  isSidebarOpen ? "p-4" : "p-2"
+                )}>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <div className={cn(
+                        "flex items-center gap-3 rounded-lg bg-white/50 border border-purple-100/50 cursor-pointer hover:bg-white/80 transition-colors duration-200",
+                        isSidebarOpen ? "p-2" : "p-1.5 justify-center"
+                      )}>
+                        <Avatar className={cn(
+                          "ring-2 ring-purple-100 ring-offset-2 transition-transform duration-200",
+                          isSidebarOpen ? "h-10 w-10" : "h-8 w-8"
                         )}>
-                          <Avatar className={cn(
-                            "ring-2 ring-purple-100 ring-offset-2 transition-transform duration-200",
-                            isSidebarOpen ? "h-10 w-10" : "h-8 w-8"
-                          )}>
-                            <AvatarImage src={user.photoURL || ''} />
-                            <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
-                              {user.email?.[0].toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          {isSidebarOpen && (
-                            <div className="flex-1 overflow-hidden">
-                              <p className="truncate text-sm font-medium text-gray-700">
-                                {user.displayName || user.email?.split('@')[0] || 'User'}
-                              </p>
-                            </div>
-                          )}
-                          {isSidebarOpen && (
-                            <ChevronDown className="h-4 w-4 text-gray-500" />
-                          )}
-                        </div>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        align={isSidebarOpen ? "end" : "start"}
-                        className="w-56"
-                      >
-                        <div className="flex items-center gap-2 p-2">
-                          <div className="flex flex-col space-y-1">
-                            <p className="text-sm font-medium leading-none">
+                          <AvatarImage src={user.photoURL || ''} />
+                          <AvatarFallback className="bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+                            {user.email?.[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        {isSidebarOpen && (
+                          <div className="flex-1 overflow-hidden">
+                            <p className="truncate text-sm font-medium text-gray-700">
                               {user.displayName || user.email?.split('@')[0] || 'User'}
                             </p>
-                            <p className="text-xs leading-none text-gray-500">{user.email}</p>
                           </div>
+                        )}
+                        {isSidebarOpen && (
+                          <ChevronDown className="h-4 w-4 text-gray-500" />
+                        )}
+                      </div>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent 
+                      align={isSidebarOpen ? "end" : "start"}
+                      className="w-56"
+                    >
+                      <div className="flex items-center gap-2 p-2">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">
+                            {user.displayName || user.email?.split('@')[0] || 'User'}
+                          </p>
+                          <p className="text-xs leading-none text-gray-500">{user.email}</p>
                         </div>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem 
-                          className="cursor-pointer"
-                          onClick={handleExport}
-                        >
-                          <Cloud className="mr-2 h-4 w-4" />
-                          <span>Export Entries</span>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-                          onClick={logout}
-                        >
-                          <LogOut className="mr-2 h-4 w-4" />
-                          <span>Sign Out</span>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Tooltip delayDuration={100}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "justify-start bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200",
-                            !isSidebarOpen && "px-0 justify-center"
-                          )}
-                          onClick={signInWithGithub}
-                        >
-                          <Github className={cn(
-                            "transition-transform duration-200",
-                            isSidebarOpen ? "mr-2" : "scale-110"
-                          )} />
-                          {isSidebarOpen && "Sign in with GitHub"}
-                        </Button>
-                      </TooltipTrigger>
-                      {!isSidebarOpen && (
-                        <TooltipContent side="right" className="font-medium">
-                          Sign in with GitHub
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                    <Tooltip delayDuration={100}>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "justify-start bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200",
-                            !isSidebarOpen && "px-0 justify-center"
-                          )}
-                          onClick={signInWithGoogle}
-                        >
-                          <Mail className={cn(
-                            "transition-transform duration-200",
-                            isSidebarOpen ? "mr-2" : "scale-110"
-                          )} />
-                          {isSidebarOpen && "Sign in with Google"}
-                        </Button>
-                      </TooltipTrigger>
-                      {!isSidebarOpen && (
-                        <TooltipContent side="right" className="font-medium">
-                          Sign in with Google
-                        </TooltipContent>
-                      )}
-                    </Tooltip>
-                  </div>
-                )}
-              </div>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        className="cursor-pointer"
+                        onClick={handleExport}
+                      >
+                        <Cloud className="mr-2 h-4 w-4" />
+                        <span>Export Entries</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                        onClick={logout}
+                      >
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Sign Out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
             </motion.div>
 
             {/* Main Content */}
