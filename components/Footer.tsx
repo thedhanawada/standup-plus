@@ -12,6 +12,9 @@ export default function Footer() {
           <p className="text-center text-sm text-muted-foreground">
             <Code className="inline h-5 w-5 text-purple-600" /> StandUp+ is an open-source tool
           </p>
+          <p className="text-center text-sm font-medium bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent animate-gradient">
+            Progress, open-source, forever free. Accessible to everyone, always.
+          </p>
           <p className="text-center text-sm text-muted-foreground">
             Version: {version}
           </p>

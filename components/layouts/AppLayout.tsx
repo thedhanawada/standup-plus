@@ -596,11 +596,8 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
 
                 {/* Open Source Message */}
                 <p className="text-center space-y-2">
-                  <span className="block text-gray-700 font-medium">
-                    StandUp+ is built with ❤️ for your progress.
-                  </span>
                   <span className="block text-gray-600 text-sm">
-                    It's free, open-source, and always will be, for everyone to use and enjoy.
+                  Open source and forever free. Accessible to everyone, always.
                   </span>
                 </p>
 
