@@ -1,0 +1,7 @@
+version: 2
+updates:
+  - package-ecosystem: "npm" # or "pip", "maven", etc.
+    directory: "/"
+    schedule:
+      interval: "daily"
+    target-branch: "dependabot-updates" # Specify the branch here
