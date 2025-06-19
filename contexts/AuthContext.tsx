@@ -35,8 +35,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    // Listen for auth state changes (client-side only)
+    if (!auth) {
+      setLoading(false)
+      return
+    }
+    
+    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
       setUser(user)
       setLoading(false)
     })
@@ -45,6 +50,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signInWithGoogle = async () => {
+    if (!auth || !googleProvider) return
+    
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, googleProvider)
@@ -64,6 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGithub = async () => {
+    if (!auth || !githubProvider) return
+    
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, githubProvider)
@@ -83,6 +92,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
+    if (!auth) return
+    
     try {
       await signOut(auth)
       toast({

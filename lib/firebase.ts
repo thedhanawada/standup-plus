@@ -28,13 +28,19 @@ if (process.env.NODE_ENV === 'development') {
   }
 }
 
-// Initialize Firebase
-const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// Initialize Firebase (client-side only)
+let app: any = null;
+let auth: any = null;
+let db: any = null;
+
+if (typeof window !== 'undefined') {
+  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  db = getFirestore(app);
+}
 
 // Initialize App Check for production security
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production' && app) {
   const recaptchaSiteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
   if (recaptchaSiteKey) {
     initializeAppCheck(app, {
@@ -48,7 +54,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
 
 // Initialize Analytics if supported
 let analytics: any = null;
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production' && app) {
   isSupported().then((supported) => {
     if (supported) {
       analytics = getAnalytics(app);
@@ -57,7 +63,7 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
 }
 
 // Configure Firestore for offline persistence in production
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production' && db) {
   // Enable offline persistence
   try {
     enableNetwork(db);
@@ -67,17 +73,22 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'production') {
 }
 
 // Auth providers configuration
-const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope('profile');
-googleProvider.addScope('email');
+let googleProvider: any = null;
+let githubProvider: any = null;
 
-const githubProvider = new GithubAuthProvider();
-githubProvider.addScope('user:email');
-githubProvider.addScope('read:user');
+if (typeof window !== 'undefined') {
+  googleProvider = new GoogleAuthProvider();
+  googleProvider.addScope('profile');
+  googleProvider.addScope('email');
+
+  githubProvider = new GithubAuthProvider();
+  githubProvider.addScope('user:email');
+  githubProvider.addScope('read:user');
+}
 
 // Utility functions
-const enableFirestore = () => enableNetwork(db);
-const disableFirestore = () => disableNetwork(db);
+const enableFirestore = () => db && enableNetwork(db);
+const disableFirestore = () => db && disableNetwork(db);
 
 export { 
   auth, 

@@ -28,7 +28,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth()
 
   useEffect(() => {
-    if (user) {
+    if (user && db) {
       // Load from Firebase
       const q = query(collection(db, `users/${user.uid}/standups`))
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -62,7 +62,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
       projects: projects || []
     }
 
-    if (user) {
+    if (user && db) {
       // Save to Firebase
       try {
         const entryToSave = {
@@ -85,7 +85,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
   }
 
   const updateEntry = async (id: string, text: string, tags?: string[], projects?: string[]) => {
-    if (user) {
+    if (user && db) {
       // Update in Firebase
       try {
         const updateData = {
@@ -109,7 +109,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
   }
 
   const deleteEntry = async (id: string) => {
-    if (user) {
+    if (user && db) {
       // Delete from Firebase
       await deleteDoc(doc(db, `users/${user.uid}/standups/${id}`))
     } else {
