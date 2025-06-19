@@ -67,23 +67,139 @@ export function AuthOverlay({ show }: { show: boolean }) {
               >
                 {/* Hero Section */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center">
-                      <Sparkles className="h-7 w-7 text-white" />
-                    </div>
-                    <span className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-                      StandUp+
-                    </span>
+                  <div className="flex items-center gap-3 group cursor-pointer">
+                    <motion.div 
+                      className="relative w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden"
+                      animate={{ 
+                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.05, 1]
+                      }}
+                      transition={{ 
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                      whileHover={{ 
+                        scale: 1.1,
+                        rotate: 10
+                      }}
+                    >
+                      {/* Animated gradient background */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-pink-600 to-blue-600 animate-pulse"></div>
+                      <div 
+                        className="absolute inset-0 opacity-75"
+                        style={{
+                          background: 'linear-gradient(45deg, #8b5cf6, #ec4899, #3b82f6, #8b5cf6)',
+                          backgroundSize: '300% 300%',
+                          animation: 'gradient-shift 3s ease infinite'
+                        }}
+                      ></div>
+                      
+                      {/* Sparkles icon with animation */}
+                      <motion.div
+                        animate={{ 
+                          rotate: [0, 360] 
+                        }}
+                        transition={{ 
+                          duration: 8,
+                          repeat: Infinity,
+                          ease: "linear"
+                        }}
+                      >
+                        <Sparkles className="h-7 w-7 text-white relative z-10 drop-shadow-lg" />
+                      </motion.div>
+                      
+                      {/* Glow effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                    </motion.div>
+                    
+                    {/* Animated text */}
+                    <motion.span 
+                      className="text-4xl font-bold relative"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.3 }}
+                    >
+                      <span 
+                        className="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent"
+                        style={{
+                          backgroundSize: '200% 200%',
+                          animation: 'text-shimmer 3s ease-in-out infinite'
+                        }}
+                      >
+                        StandUp+
+                      </span>
+                      
+                      {/* Sparkle particles */}
+                      <motion.div
+                        className="absolute -top-2 -right-2 w-2 h-2 bg-yellow-400 rounded-full"
+                        animate={{
+                          scale: [0, 1, 0],
+                          rotate: [0, 180, 360],
+                          opacity: [0, 1, 0]
+                        }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: 0.5
+                        }}
+                      />
+                      <motion.div
+                        className="absolute top-0 left-0 w-1 h-1 bg-pink-400 rounded-full"
+                        animate={{
+                          scale: [0, 1, 0],
+                          x: [0, 10, 0],
+                          y: [0, -5, 0],
+                          opacity: [0, 1, 0]
+                        }}
+                        transition={{
+                          duration: 2.5,
+                          repeat: Infinity,
+                          delay: 1
+                        }}
+                      />
+                    </motion.span>
                   </div>
                   
-                  <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                  <motion.h1 
+                    className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5, duration: 0.8 }}
+                  >
                     Daily standups made 
-                    <span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"> effortless</span>
-                  </h1>
+                    <motion.span 
+                      className="relative"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.8, duration: 0.5 }}
+                    >
+                      <span 
+                        className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent"
+                        style={{
+                          backgroundSize: '200% 200%',
+                          animation: 'text-shimmer 4s ease-in-out infinite'
+                        }}
+                      > effortless</span>
+                      
+                      {/* Underline animation */}
+                      <motion.div
+                        className="absolute -bottom-2 left-0 h-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ delay: 1.2, duration: 0.8, ease: "easeOut" }}
+                      />
+                    </motion.span>
+                  </motion.h1>
                   
-                  <p className="text-xl text-gray-600 leading-relaxed">
+                  <motion.p 
+                    className="text-xl text-gray-600 leading-relaxed"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.0, duration: 0.8 }}
+                  >
                     Transform your daily updates into powerful insights. Track progress, maintain streaks, and keep your team aligned with beautiful, AI-powered standup management.
-                  </p>
+                  </motion.p>
                 </div>
 
                 {/* Features Grid */}
@@ -94,9 +210,25 @@ export function AuthOverlay({ show }: { show: boolean }) {
                       initial={{ y: 20, opacity: 0 }}
                       animate={{ y: 0, opacity: 1 }}
                       transition={{ delay: 0.3 + index * 0.1 }}
-                      className="bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/20"
+                      whileHover={{ 
+                        y: -5, 
+                        scale: 1.02,
+                        transition: { duration: 0.2 }
+                      }}
+                      className={`bg-white/70 backdrop-blur-sm rounded-xl p-4 border border-white/20 hover:shadow-lg transition-shadow duration-300 ${
+                        index % 2 === 0 ? 'animate-float' : ''
+                      }`}
+                      style={{ 
+                        animationDelay: `${index * 0.5}s`,
+                        animationDuration: '4s'
+                      }}
                     >
-                      <feature.icon className="h-6 w-6 text-purple-600 mb-2" />
+                      <motion.div
+                        whileHover={{ rotate: 10, scale: 1.1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <feature.icon className="h-6 w-6 text-purple-600 mb-2" />
+                      </motion.div>
                       <h3 className="font-semibold text-gray-900 mb-1">{feature.title}</h3>
                       <p className="text-sm text-gray-600 leading-relaxed">{feature.description}</p>
                     </motion.div>
