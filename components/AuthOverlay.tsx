@@ -27,15 +27,15 @@ export function AuthOverlay({ show }: { show: boolean }) {
                 </div>
                 <span className="text-3xl font-bold text-gray-900">StandUp+</span>
               </div>
-              <h1 className="text-xl font-semibold text-gray-900 mb-2">Welcome back</h1>
-              <p className="text-gray-600">Sign in to start logging your daily progress</p>
+              <h1 className="text-xl font-semibold text-gray-900 mb-2">Welcome to StandUp+</h1>
+              <p className="text-gray-600">Try it out as a guest or sign in to sync across devices</p>
             </div>
             
             <LoginForm />
             
             <div className="mt-6 text-center">
               <p className="text-xs text-gray-500">
-                By signing in, you agree to our terms and privacy policy
+                Guest mode stores data locally. Sign in to sync across devices.
               </p>
             </div>
           </motion.div>
