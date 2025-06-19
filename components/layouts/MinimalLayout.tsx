@@ -33,15 +33,15 @@ import { motion, AnimatePresence } from "framer-motion"
 type ViewMode = "quick" | "calendar" | "list"
 
 export function MinimalLayout({ children }: { children?: React.ReactNode }) {
-  const { user, loading, isAuthenticating, signInWithGoogle, signInWithGithub, logout } = useAuth()
+  const { user, loading, isAuthenticating, isGuest, signInWithGoogle, signInWithGithub, logout, startGuestMode } = useAuth()
   const { entries } = useStandup()
   const [currentView, setCurrentView] = useState<ViewMode>("quick")
   const [streak, setStreak] = useState(0)
 
   // Debug logging
   useEffect(() => {
-    console.log('MinimalLayout state:', { user: !!user, loading, isAuthenticating })
-  }, [user, loading, isAuthenticating])
+    console.log('MinimalLayout state:', { user: !!user, loading, isAuthenticating, isGuest })
+  }, [user, loading, isAuthenticating, isGuest])
 
   // Calculate streak
   useEffect(() => {
@@ -81,7 +81,7 @@ export function MinimalLayout({ children }: { children?: React.ReactNode }) {
     )
   }
 
-  if (!user) {
+  if (!user && !isGuest) {
     return <AuthOverlay show={true} />
   }
 
@@ -102,7 +102,14 @@ export function MinimalLayout({ children }: { children?: React.ReactNode }) {
               <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">S+</span>
               </div>
-              <span className="text-xl font-semibold text-gray-900">StandUp+</span>
+              <div className="flex items-center space-x-2">
+                <span className="text-xl font-semibold text-gray-900">StandUp+</span>
+                {isGuest && (
+                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                    Guest Mode
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Quick Stats & Navigation */}
@@ -159,9 +166,9 @@ export function MinimalLayout({ children }: { children?: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="flex items-center space-x-2 p-2">
                     <Avatar className="w-7 h-7">
-                      <AvatarImage src={user.photoURL || ""} alt={user.displayName || ""} />
+                      <AvatarImage src={user?.photoURL || ""} alt={user?.displayName || ""} />
                       <AvatarFallback>
-                        {user.displayName?.charAt(0) || user.email?.charAt(0) || "U"}
+                        {isGuest ? "G" : user?.displayName?.charAt(0) || user?.email?.charAt(0) || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -169,17 +176,35 @@ export function MinimalLayout({ children }: { children?: React.ReactNode }) {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
                   <div className="px-3 py-2 text-sm">
-                    <div className="font-medium">{user.displayName}</div>
-                    <div className="text-gray-500 text-xs">{user.email}</div>
+                    {isGuest ? (
+                      <>
+                        <div className="font-medium">Guest User</div>
+                        <div className="text-gray-500 text-xs">Try mode - data saved locally</div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="font-medium">{user?.displayName}</div>
+                        <div className="text-gray-500 text-xs">{user?.email}</div>
+                      </>
+                    )}
                   </div>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
                     <ExportButton />
                   </DropdownMenuItem>
+                  {isGuest && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={signInWithGoogle}>
+                        <User className="w-4 h-4 mr-2" />
+                        Sign Up to Save Online
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={logout}>
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sign Out
+                    {isGuest ? "Exit Guest Mode" : "Sign Out"}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

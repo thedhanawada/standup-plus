@@ -12,9 +12,11 @@ type AuthContextType = {
   user: User | null
   loading: boolean
   isAuthenticating: boolean
+  isGuest: boolean
   signInWithGoogle: () => Promise<void>
   signInWithGithub: () => Promise<void>
   logout: () => Promise<void>
+  startGuestMode: () => void
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -31,11 +33,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [isGuest, setIsGuest] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
 
   useEffect(() => {
     console.log('AuthContext: Initializing auth listener, auth object:', !!auth)
+    
+    // Check for guest mode in localStorage
+    const guestMode = localStorage.getItem('guestMode')
+    if (guestMode === 'true') {
+      setIsGuest(true)
+      setLoading(false)
+      return
+    }
     
     // Listen for auth state changes (client-side only)
     if (!auth) {
@@ -48,6 +59,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
       console.log('AuthContext: Auth state changed, user:', !!user)
       setUser(user)
+      if (user) {
+        setIsGuest(false)
+        localStorage.removeItem('guestMode')
+      }
       setLoading(false)
     })
 
@@ -97,6 +112,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
+    if (isGuest) {
+      setIsGuest(false)
+      localStorage.removeItem('guestMode')
+      toast({
+        title: "Exited guest mode",
+        description: "Your local data has been preserved.",
+      })
+      return
+    }
+    
     if (!auth) return
     
     try {
@@ -114,14 +139,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
+  const startGuestMode = () => {
+    setIsGuest(true)
+    localStorage.setItem('guestMode', 'true')
+    toast({
+      title: "Guest mode activated",
+      description: "You can now try all features. Data will be saved locally.",
+    })
+  }
+
   return (
     <AuthContext.Provider value={{
       user,
       loading,
       isAuthenticating,
+      isGuest,
       signInWithGoogle,
       signInWithGithub,
-      logout
+      logout,
+      startGuestMode
     }}>
       {loading ? (
         <div className="h-screen w-screen flex items-center justify-center">
