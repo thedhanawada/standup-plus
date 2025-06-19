@@ -35,13 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
+    console.log('AuthContext: Initializing auth listener, auth object:', !!auth)
+    
     // Listen for auth state changes (client-side only)
     if (!auth) {
+      console.log('AuthContext: No auth object, setting loading to false')
       setLoading(false)
       return
     }
     
+    console.log('AuthContext: Setting up auth state listener')
     const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
+      console.log('AuthContext: Auth state changed, user:', !!user)
       setUser(user)
       setLoading(false)
     })
