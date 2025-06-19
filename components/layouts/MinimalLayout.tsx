@@ -38,6 +38,11 @@ export function MinimalLayout({ children }: { children?: React.ReactNode }) {
   const [currentView, setCurrentView] = useState<ViewMode>("quick")
   const [streak, setStreak] = useState(0)
 
+  // Debug logging
+  useEffect(() => {
+    console.log('MinimalLayout state:', { user: !!user, loading, isAuthenticating })
+  }, [user, loading, isAuthenticating])
+
   // Calculate streak
   useEffect(() => {
     if (entries.length === 0) {
