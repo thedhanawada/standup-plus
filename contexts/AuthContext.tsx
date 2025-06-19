@@ -37,7 +37,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Listen for auth state changes
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth state changed:", user?.uid, user?.email)
       setUser(user)
       setLoading(false)
     })
@@ -49,7 +48,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, googleProvider)
-      console.log("Google sign in success:", result.user.uid)
       toast({
         title: "Welcome!",
         description: "Successfully signed in with Google.",
@@ -69,7 +67,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, githubProvider)
-      console.log("GitHub sign in success:", result.user.uid)
       toast({
         title: "Welcome!",
         description: "Successfully signed in with GitHub.",

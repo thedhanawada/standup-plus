@@ -37,7 +37,6 @@ function StandupListContent() {
 
   // Debug effect to monitor editingId changes
   useEffect(() => {
-    console.log('editingId changed:', editingId);
     
     // Reset form state when closing the edit form
     if (!editingId) {
@@ -111,7 +110,6 @@ function StandupListContent() {
       return;
     }
     
-    console.log('Save clicked:', { id, editText, editTags, editProjects });
     setIsSaving(true);
     
     try {

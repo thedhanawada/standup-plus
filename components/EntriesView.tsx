@@ -16,7 +16,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { format, parseISO } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 import ContributionCalendar from "./ContributionCalendar"
-import { EntriesList } from "./EntriesList"
+import { EntriesList } from "./entries/EntriesList"
 
 export default function EntriesView() {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar")

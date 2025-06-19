@@ -34,7 +34,6 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const firebaseEntries = snapshot.docs.map(doc => {
           const data = doc.data();
-          console.log('Firebase entry data:', { id: doc.id, ...data });
           return {
             id: doc.id,
             text: data.text,
@@ -43,7 +42,6 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
             projects: Array.isArray(data.projects) ? data.projects : []
           };
         });
-        console.log('Processed entries:', firebaseEntries);
         setEntries(firebaseEntries);
       })
       return () => unsubscribe()
@@ -57,15 +55,12 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
   }, [user])
 
   const addEntry = async (text: string, tags?: string[], projects?: string[]) => {
-    console.log('addEntry called with:', { text, tags, projects });
-    
     const newEntry = {
       text,
       date: new Date().toISOString(),
       tags: tags || [],
       projects: projects || []
     }
-    console.log('newEntry constructed:', newEntry);
 
     if (user) {
       // Save to Firebase
@@ -76,18 +71,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
           tags: Array.isArray(newEntry.tags) ? newEntry.tags : [],
           projects: Array.isArray(newEntry.projects) ? newEntry.projects : []
         }
-        console.log('Preparing to save to Firebase:', entryToSave);
-        console.log('Tags type:', typeof entryToSave.tags, 'Projects type:', typeof entryToSave.projects);
-        console.log('Tags is array:', Array.isArray(entryToSave.tags), 'Projects is array:', Array.isArray(entryToSave.projects));
-        console.log('Tags length:', entryToSave.tags.length, 'Projects length:', entryToSave.projects.length);
-        
         const docRef = await addDoc(collection(db, `users/${user.uid}/standups`), entryToSave);
-        console.log('Successfully saved to Firebase with ID:', docRef.id);
-        
-        // Verify the saved data
-        const savedDoc = await getDoc(docRef);
-        const savedData = savedDoc.data();
-        console.log('Verified saved data:', savedData);
       } catch (error) {
         console.error("Error adding entry:", error)
       }
@@ -110,9 +94,7 @@ export function StandupProvider({ children }: { children: React.ReactNode }) {
           tags: tags || [],
           projects: projects || []
         }
-        console.log('Updating entry in Firebase:', { id, updateData });
         await updateDoc(doc(db, `users/${user.uid}/standups/${id}`), updateData)
-        console.log('Entry updated successfully');
       } catch (error) {
         console.error("Error updating entry:", error)
       }
