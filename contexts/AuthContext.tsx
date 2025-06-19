@@ -35,9 +35,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      console.log("Auth state changed:", user?.uid, user?.email)
+    console.log('AuthContext: Initializing auth listener, auth object:', !!auth)
+    
+    // Listen for auth state changes (client-side only)
+    if (!auth) {
+      console.log('AuthContext: No auth object, setting loading to false')
+      setLoading(false)
+      return
+    }
+    
+    console.log('AuthContext: Setting up auth state listener')
+    const unsubscribe = auth.onAuthStateChanged((user: User | null) => {
+      console.log('AuthContext: Auth state changed, user:', !!user)
       setUser(user)
       setLoading(false)
     })
@@ -46,10 +55,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signInWithGoogle = async () => {
+    if (!auth || !googleProvider) return
+    
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, googleProvider)
-      console.log("Google sign in success:", result.user.uid)
       toast({
         title: "Welcome!",
         description: "Successfully signed in with Google.",
@@ -66,10 +76,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signInWithGithub = async () => {
+    if (!auth || !githubProvider) return
+    
     try {
       setIsAuthenticating(true)
       const result = await signInWithPopup(auth, githubProvider)
-      console.log("GitHub sign in success:", result.user.uid)
       toast({
         title: "Welcome!",
         description: "Successfully signed in with GitHub.",
@@ -86,6 +97,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = async () => {
+    if (!auth) return
+    
     try {
       await signOut(auth)
       toast({

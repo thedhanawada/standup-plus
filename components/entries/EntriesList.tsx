@@ -1,7 +1,7 @@
 import { useStandup } from "@/contexts/StandupContext"
 import { format, parseISO } from "date-fns"
 import { ChevronLeft } from "lucide-react"
-import { Button } from "./ui/button"
+import { Button } from "../ui/button"
 
 interface EntriesListProps {
   selectedDate: string | null

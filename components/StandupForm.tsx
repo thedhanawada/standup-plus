@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
-import { CurrentTime } from "./CurrentTime"
+import { TimeDisplay as CurrentTime } from "./TimeDisplay"
 import { useAuth } from "@/contexts/AuthContext"
 
 export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean }) {
@@ -30,11 +30,8 @@ export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean 
     const trimmedTag = currentTag.trim()
     if (trimmedTag && !tags.includes(trimmedTag)) {
       const newTags = [...tags, trimmedTag]
-      console.log('Adding tag:', trimmedTag)
-      console.log('Current tags:', tags)
       setTags(newTags)
       setCurrentTag("")
-      console.log('Updated tags:', newTags)
     }
   }
 
@@ -42,11 +39,8 @@ export default function StandupForm({ isSidebarOpen }: { isSidebarOpen: boolean 
     const trimmedProject = currentProject.trim()
     if (trimmedProject && !projects.includes(trimmedProject)) {
       const newProjects = [...projects, trimmedProject]
-      console.log('Adding project:', trimmedProject)
-      console.log('Current projects:', projects)
       setProjects(newProjects)
       setCurrentProject("")
-      console.log('Updated projects:', newProjects)
     }
   }
 

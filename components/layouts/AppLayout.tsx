@@ -156,7 +156,7 @@ function Overview() {
       </div>
 
       {/* Contribution Calendar Section */}
-      <ContributionCalendar onDateClick={(date) => console.log(date)} />
+      <ContributionCalendar onDateClick={(date) => {}} />
 
       {/* Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
@@ -239,13 +239,9 @@ export function AppLayout({ children }: { children?: React.ReactNode }) {
     })
   }
 
-  useEffect(() => {
-    console.log("AppLayout auth state:", user?.uid, isAuthenticating)
-  }, [user, isAuthenticating])
 
   const handleCalendarClick = (date: string) => {
     // Your logic for handling the date click
-    console.log("Date clicked:", date);
   }
 
   const handlePresentClick = () => {
